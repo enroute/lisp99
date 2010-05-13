@@ -1,0 +1,13 @@
+Ninety-nine lisp problems based on a Prolog problem list by
+werner.hett@hti.bfh.ch. This project is inspired by the page of
+
+http://www.ic.unicamp.br/~meidanis/courses/mc336/2006s2/funcional/L-99_Ninety-Nine_Lisp_Problems.html
+
+However, I found that the links to many solutions are not
+accessible. So I decide to rewrite it, just to get more familiar with
+elisp.
+
+Since I'm just a newbie, errors and bugs are inevitable. If your find
+one, please do me a favor to point it out.
+
+If any of you found it useful, you could use the code freely.
