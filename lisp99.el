@@ -138,4 +138,45 @@
 			     (cons (list count lastelem) nil))))))
 
 
-  
+;; P12 Decode a run-length encoded list.
+;; Given a run-length code list generated as specified in problem
+;; P11. Construct its uncompressed version.
+;; (my-unpack-run-length '((4 a) b (2 c) (2 a) d (4 e)))
+;; =>(a a a a b c c a a d e e ...)
+(defun my-unpack-run-length (LIST)
+  (let (unpacklist)
+    (dolist (elem LIST)
+      (if (listp elem)
+	  (setq unpacklist (append unpacklist 
+				   (make-list (car elem) (nth 1 elem))))
+	(setq unpacklist (append unpacklist (cons elem nil)))))
+    unpacklist))
+
+;; P13 Run-length encoding of a list (direct solution).
+;; Implement the so-called run-length encoding data compression method
+;; directly. I.e. don't explicitly create the sublists containing the
+;; duplicates, as in problem P09, but only count them. As in problem
+;; P11, simplify the result list by replacing the singleton lists (1
+;; X) by X.
+;; 
+;; Already done in P11.
+
+;; P14 Duplicate the elements of a list.
+;; Example:
+;; (my-duplicate '(a b c c d))
+;; =>(a a b b c c c c d d)
+(defun my-duplicate (LIST)
+  (let (duplist)
+    (dolist (elem LIST)
+      (setq duplist (append duplist (list elem elem))))
+    duplist))
+
+P15 (**) Replicate the elements of a list a given number of times.
+Example:
+;; (my-replicate '(a b c) 3)
+;; =>(a a a b b b c c c)
+(defun my-replicate (LIST repeat)
+  (let (replist)
+    (dolist (elem LIST)
+      (setq replist (append replist (make-list repeat elem))))
+    replist))
