@@ -289,7 +289,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; The selected items shall be returned in a list.
 ;; Example:
 ;; (my-random-select '(a b c d e f g h) 4) => (c d f e)
-;; Hint: Use the built-in random number generator and the result of problem P20.
+;; keywords: `random' `add-to-list'
 (defun my-random-select (list n)
   (let (indexlist
 	randomlist
@@ -304,27 +304,72 @@ non-destructive version is `butlast' which uses `copy-sequence'."
       (push (nth elem list) randomlist))
     randomlist))
 
+;; P24 (*) Lotto: Draw N different random numbers from the set 1..M. 
+;; The selected numbers shall be returned in a list.
+;; Example:
+;; (my-lotto-select 6 10) => (2 8 5 6 1 3)
+;; (my-lotto-select 6 4)  => (3 2 4 1)
+;; keywords: `random' `add-to-list'
+;; other ways: consider the subtract method, i.e., remove those
+;; elements we don't need in the original list.
+(defun my-lotto-select (n max)
+  (if (<= n 0)
+      nil
+    (let (lotto
+	  (count n))
+      (unless (<= n max) (setq count max))
+      ;; make sure it's not empty
+      (push (1+ (random max)) lotto)
+      (while (< (length lotto) count)
+	(add-to-list 'lotto (1+ (random max))))
+      lotto)))
 
-P24 (*) Lotto: Draw N different random numbers from the set 1..M. 
-The selected numbers shall be returned in a list.
-Example:
-* (lotto-select 6 49)
-(23 1 17 33 21 37)
+;; P25 (*) Generate a random permutation of the elements of a list. 
+;; Example:
+;; (my-random-permu '(a b c d e f)) => (c f e b d a)
+(my-random-permu 3)
+(defun my-random-permu (list)
+  (unless (listp list) (error list))
+  (if (null list)
+      nil
+    (let (indexlist permulist (len (length list)))
+      (push (random len) indexlist)
+      (while (< (length indexlist) len)
+	(add-to-list 'indexlist (random len)))
+      (dolist (index indexlist)
+	(push (nth index list) permulist))
+      permulist)))
 
-Hint: Combine the solutions of problems P22 and P23.
+;; P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list 
+;; In how many ways can a committee of 3 be chosen from a group of 12
+;; people? We all know that there are C(12,3) = 220 possibilities
+;; (C(N,K) denotes the well-known binomial coefficients). For pure
+;; mathematicians, this result may be great. But we want to really
+;; generate all the possibilities in a list.
+;; Example:
+(my-combination 3 '(a b c d e f))
+(defun my-combination (n list)
+  
 
-P25 (*) Generate a random permutation of the elements of a list. 
-Example:
-* (rnd-permu '(a b c d e f))
-(B A D C E F)
+(defun my-comb-init (n)
+  (number-sequence 1 n))
+(defun my-comb-max (n max)
+  (number-sequence (1+ (- max n)) max))
+(defun my-comb+1 (list max)
+  (let ((len (length list))
+	(c -1)
+	(elem (car (last list))))
+    (if (< elem max)
+	(setf (nth (1- len) list) (1+ elem))
+      ;; find the
 
-Hint: Use the solution of problem P23.
+    list))
 
-P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list 
-In how many ways can a committee of 3 be chosen from a group of 12 people? We all know that there are C(12,3) = 220 possibilities (C(N,K) denotes the well-known binomial coefficients). For pure mathematicians, this result may be great. But we want to really generate all the possibilities in a list.
+    
+(setq a '(0 1 2 3 4))
+(car (last a 2))
 
-Example:
-* (combination 3 '(a b c d e f))
+
 ((A B C) (A B D) (A B E) ... ) 
 
 P27 (**) Group the elements of a set into disjoint subsets. 
