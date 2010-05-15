@@ -349,8 +349,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; Example:
 (my-combination 3 '(a b c d e f))
 (defun my-combination (n list)
-  
-
+;;;; TODO TODO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my-comb-init (n)
   (number-sequence 1 n))
 (defun my-comb-max (n max)
@@ -369,13 +368,13 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 (setq a '(0 1 2 3 4))
 (car (last a 2))
 
-
 ((A B C) (A B D) (A B E) ... ) 
 
-P27 (**) Group the elements of a set into disjoint subsets. 
-a) In how many ways can a group of 9 people work in 3 disjoint subgroups of 2, 3 and 4 persons? Write a function that generates all the possibilities and returns them in a list.
-
-Example:
+;; P27 (**) Group the elements of a set into disjoint subsets. 
+;; a) In how many ways can a group of 9 people work in 3 disjoint
+;; subgroups of 2, 3 and 4 persons? Write a function that generates
+;; all the possibilities and returns them in a list.
+;; Example:
 * (group3 '(aldo beat carla david evi flip gary hugo ida))
 ( ( (ALDO BEAT) (CARLA DAVID EVI) (FLIP GARY HUGO IDA) )
 ... )
@@ -409,27 +408,55 @@ Note that in the above example, the first two lists in the result have length 4 
 Arithmetic
 P31 (**) Determine whether a given integer number is prime. 
 Example:
-* (is-prime 7)
-T
+(my-is-prime 10)
+(defun my-is-prime (n)
+  (let ((isprime t)
+	(i 2)
+	(n2 (floor (sqrt n))))
+    (while (<= i n2)
+      (if (= (* (/ n i) i) n)
+	  (setf isprime nil i n2)
+	(setq i (1+ i))))
+    isprime))
 
-P32 (**) Determine the greatest common divisor of two positive integer numbers. 
-Use Euclid's algorithm.
-Example:
-* (gcd 36 63)
-9
+;; P32 (**) Determine the greatest common divisor of two positive integer numbers. 
+;; Use Euclid's algorithm.
+;; Example:
+;; (my-gcd 36 63) => 9
+(defun my-gcd (a b)
+  (let ((m (abs a)) (n (abs b)) r)
+    (setq n (- (+ m n) (setq m (if (> m n) m n))))
+    (setq r n)
+    (while (> r 0)
+      (setq n r)
+      (setq r (% m n))
+      (setq m n))
+    n))
 
-P33 (*) Determine whether two positive integer numbers are coprime. 
-Two numbers are coprime if their greatest common divisor equals 1.
-Example:
-* (coprime 35 64)
-T
+;; P33 (*) Determine whether two positive integer numbers are coprime. 
+;; Two numbers are coprime if their greatest common divisor equals 1.
+;; Example:
+;; (my-coprime 35 64) => t
+(defun my-coprime (a b)
+  (if (= 1 (my-gcd a b))
+      t
+    nil))
 
-P34 (**) Calculate Euler's totient function phi(m). 
-Euler's so-called totient function phi(m) is defined as the number of positive integers r (1 <= r < m) that are coprime to m.
-Example: m = 10: r = 1,3,7,9; thus phi(m) = 4. Note the special case: phi(1) = 1.
+;; P34 (**) Calculate Euler's totient function phi(m). 
+;; Euler's so-called totient function phi(m) is defined as the number
+;; of positive integers r (1 <= r < m) that are coprime to m.
+;; Example: m = 10: r = 1,3,7,9; thus phi(m) = 4. Note the special
+;; case: phi(1) = 1.
+;; require `my-gcd'.
+(my-totient-phi 10)
+(defun my-totient-phi (n)
+  (let ((phi 1) (i 2))
+    (while (< i n)
+      ;(unless (zerop (% n i)) (setq phi (1+ phi)))
+      (if (= 1 (my-gcd i n)) (setq phi (1+ phi)))
+      (setq i (1+ i)))
+    phi))
 
-* (totient-phi 10)
-4
 
 Find out what the value of phi(m) is if m is a prime number. Euler's totient function plays an important role in one of the most widely used public key cryptography methods (RSA). In this exercise you should use the most primitive method to calculate this function (there are smarter ways that we shall discuss later).
 
