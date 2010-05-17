@@ -405,19 +405,21 @@ Example:
 
 Note that in the above example, the first two lists in the result have length 4 and 1, both lengths appear just once. The third and forth list have length 3 which appears twice (there are two list of this length). And finally, the last three lists have length 2. This is the most frequent length. 
 
-Arithmetic
-P31 (**) Determine whether a given integer number is prime. 
-Example:
-(my-is-prime 10)
+;; Arithmetic
+;; P31 (**) Determine whether a given integer number is prime. 
+;; Example:
+;; (my-is-prime 19) => t
+;; (my-is-prime 24) => nil
 (defun my-is-prime (n)
   (let ((isprime t)
 	(i 2)
 	(n2 (floor (sqrt n))))
-    (while (<= i n2)
-      (if (= (* (/ n i) i) n)
-	  (setf isprime nil i n2)
-	(setq i (1+ i))))
+    (while (and (<= i n2) isprime)
+      (if (zerop (% n i))
+	  (setq isprime nil)
+    	(setq i (1+ i))))
     isprime))
+
 
 ;; P32 (**) Determine the greatest common divisor of two positive integer numbers. 
 ;; Use Euclid's algorithm.
@@ -437,6 +439,7 @@ Example:
 ;; Two numbers are coprime if their greatest common divisor equals 1.
 ;; Example:
 ;; (my-coprime 35 64) => t
+;; Requirement: the greatest common divisor function `my-gcd' in P32.
 (defun my-coprime (a b)
   (if (= 1 (my-gcd a b))
       t
@@ -460,26 +463,110 @@ Example:
 
 Find out what the value of phi(m) is if m is a prime number. Euler's totient function plays an important role in one of the most widely used public key cryptography methods (RSA). In this exercise you should use the most primitive method to calculate this function (there are smarter ways that we shall discuss later).
 
+;; Sieve of Eratosthenes
+;; (my-sieve-of-eratosthenes 40)
+;; (setq sieve (my-sieve-of-eratosthenes 40))
+(defun my-sieve-of-eratosthenes (n)
+  (let ((primes (list 2)) (k 3) nk m)
+    ;; If (list 2) is written as '(2), then the following `nreverse' will
+    ;; NOT work as it's suggested to be for the second time and after.
+    ;; Replace `nreverse' with `reverse' would solve the problem.
+    (while (<= k n)
+      (push k primes)
+      (setq k (+ k 2)))
+    (setq primes (nreverse primes))
+    (setq k 0)
+    (setq nk (nth k primes))
+    (while (<= (* nk nk) n)
+      ;; remove compositions
+      (setq m (+ nk nk))
+      (while (<= m n)
+    	(delq m primes)
+    	(setq m (+ m nk)))
+      (setq k (1+ k))
+      (setq nk (nth k primes)))
+    primes))
+;; Sieve of Euler
+(defun my-sieve-of-euler (n)
+  (let ((primes (list 2))
+	(i 3) j ni nj m)
+    (while (<= i n)
+      (push i primes)
+      (setq i (+ i 2)))
+    (setq primes (nreverse primes))
+    (setq i 1)
+    (setq j i)
+    (setq ni (nth i primes))
+    (setq nj (nth j primes))
+    (setq m (* ni nj))
+    (while (and (< i (length primes)) (<= m n))
+      (while (and (< j (length primes)) (<= m n))
+	(delq m primes)
+	(setq j (1+ j))
+	(setq nj (nth j primes)))
+      (setq i (1+ i))
+      (setq j i)
+      (setq ni (nth i primes))
+      (setq nj (nth j primes))
+      (setq m (* ni nj)))
+    primes))
+(defun my-sieve (n)
+  (my-sieve-of-euler n))
+;; (my-sieve-of-euler 28) => (2 3 5 7 11 13 15 17 19 21 23 27)
 
-P35 (**) Determine the prime factors of a given positive integer. 
-Construct a flat list containing the prime factors in ascending order.
-Example:
-* (prime-factors 315)
-(3 3 5 7)
+;; P35 (**) Determine the prime factors of a given positive integer. 
+;; Construct a flat list containing the prime factors in ascending order.
+;; Example:
+;; (my-prime-factors 315) => ((3 2) (5 1) (7 1))
+;; (my-prime-factors 8138) => ((2 1) (13 1) (313 1))
+;; Requirement: `my-sieve-of-eratosthenes'.
+(defun my-prime-factors (n)
+  (let* ((sieve (my-sieve-of-eratosthenes n))
+	 (p (car sieve))
+	 (pfactors nil)
+	 (m 0))
+    (while (and p (<= p n))
+      (if (zerop (% n p))
+	  (setq m (1+ m)
+		n (/ n p))
+	(if (zerop m)
+	    (setq p (car (setq sieve (cdr sieve))))
+	  (setq pfactors (append pfactors (cons (list p m) nil)))
+	  (setq m 0))))
+    (unless (zerop m)
+      	  (setq pfactors (append pfactors (cons (list p m) nil))))
+    pfactors))
 
-P36 (**) Determine the prime factors of a given positive integer (2). 
-Construct a list containing the prime factors and their multiplicity.
-Example:
-* (prime-factors-mult 315)
-((3 2) (5 1) (7 1))
-Hint: The problem is similar to problem P13.
+;; P36 (**) Determine the prime factors of a given positive integer (2). 
+;; Construct a list containing the prime factors and their multiplicity.
+;; Example:
+;; (my-prime-factors-mult 315)
+;; ((3 2) (5 1) (7 1))
+;; Hint: The problem is similar to problem
+;; Ref. P35.
+    
 
-
-P37 (**) Calculate Euler's totient function phi(m) (improved). 
-See problem P34 for the definition of Euler's totient function. If the list of the prime factors of a number m is known in the form of problem P36 then the function phi(m) can be efficiently calculated as follows: Let ((p1 m1) (p2 m2) (p3 m3) ...) be the list of prime factors (and their multiplicities) of a given number m. Then phi(m) can be calculated with the following formula:
-phi(m) = (p1 - 1) * p1 ** (m1 - 1) + (p2 - 1) * p2 ** (m2 - 1) + (p3 - 1) * p3 ** (m3 - 1) + ...
-
-Note that a ** b stands for the b'th power of a.
+;; P37 (**) Calculate Euler's totient function phi(m) (improved). 
+;; See problem P34 for the definition of Euler's totient function. If
+;; the list of the prime factors of a number m is known in the form of
+;; problem P36 then the function phi(m) can be efficiently calculated
+;; as follows: Let ((p1 m1) (p2 m2) (p3 m3) ...) be the list of prime
+;; factors (and their multiplicities) of a given number m. Then phi(m)
+;; can be calculated with the following formula:
+;; phi(m) = (p1 - 1) * p1 ** (m1 - 1) + (p2 - 1) * p2 ** (m2 - 1) +
+;;          (p3 - 1) * p3 ** (m3 - 1) + ...
+;; Note that a ** b stands for the b'th power of a.
+(defun my-power (x n)
+  "Return X^N, where N should be a natural number."
+  (if (zerop n)
+      1
+    (* x (my-power x (1- n)))))
+(defun my-phi-improved (pmlist)
+  (let ((phi 0))
+    (dolist (pm pmlist)
+      (setq phi (+ phi (my-power (car pm) (cadr pm)))))
+    phi))
+;; (my-phi-improved '((2 3) (3 2) (5 1))) => 22
 
 
 P38 (*) Compare the two methods of calculating Euler's totient function. 
@@ -488,23 +575,50 @@ Use the solutions of problems P34 and P37 to compare the algorithms. Take the nu
 P39 (*) A list of prime numbers. 
 Given a range of integers by its lower and upper limit, construct a list of all prime numbers in that range.
 
-P40 (**) Goldbach's conjecture. 
-Goldbach's conjecture says that every positive even number greater than 2 is the sum of two prime numbers. Example: 28 = 5 + 23. It is one of the most famous facts in number theory that has not been proved to be correct in the general case. It has been numerically confirmed up to very large numbers (much larger than we can go with our Prolog system). Write a predicate to find the two prime numbers that sum up to a given even integer.
-Example:
-* (goldbach 28)
-(5 23)
+;; P40 (**) Goldbach's conjecture. 
+;; Goldbach's conjecture says that every positive even number greater
+;; than 2 is the sum of two prime numbers. Example: 28 = 5 + 23. It is
+;; one of the most famous facts in number theory that has not been
+;; proved to be correct in the general case. It has been numerically
+;; confirmed up to very large numbers (much larger than we can go with
+;; our Prolog system). Write a predicate to find the two prime numbers
+;; that sum up to a given even integer.
+;; Example:
+;; (my-goldbach 38) => ((7 31) (19 19))
+;; (my-goldbach 86) => ((3 83) (7 79) (13 73) (19 67) (43 43))
+;; Requirement: `my-is-prime'.
+(defun my-goldbach (n)
+  (let* ((x 3) (y (- n x))
+	 pairs)
+    (while (<= x y)
+      (if (and (my-is-prime x)
+      	       (my-is-prime y))
+      	  (push (list x y) pairs))
+      (setq x (+ x 2)
+	    y (- y 2)))
+    (nreverse pairs)))
 
+;; P41 (**) A list of Goldbach compositions. 
+;; Given a range of integers by its lower and upper limit, print a
+;; list of all even numbers and their Goldbach composition.
+;; Example:
+;; (my-goldbach-list 9 20)
+(defun my-goldbach-list (n m)
+  (let ((i (if (zerop (% n 2))
+	       n
+	     (1+ n)))
+	pairs
+	msg)
+    (while (<= i m)
+      (setq pairs (my-goldbach i))
+      (setq msg (format "%d" i))
+      (dolist (pair pairs)
+	(setq msg (concat msg (format "=%d+%d" (car pair) (cadr
+							   pair)))))
+      (message msg)
+      (setq i (+ i 2)))))
+;; (my-goldbach-list 9 20)
 
-P41 (**) A list of Goldbach compositions. 
-Given a range of integers by its lower and upper limit, print a list of all even numbers and their Goldbach composition.
-Example:
-* (goldbach-list 9 20)
-10 = 3 + 7
-12 = 5 + 7
-14 = 3 + 11
-16 = 3 + 13
-18 = 5 + 13
-20 = 3 + 17
 
 In most cases, if an even number is written as the sum of two prime numbers, one of them is very small. Very rarely, the primes are both bigger than say 50. Try to find out how many such cases there are in the range 2..3000.
 
