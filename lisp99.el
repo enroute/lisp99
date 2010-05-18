@@ -39,10 +39,10 @@
   (if (equal list nil)
       nil
     (let ((elem (car list))
-	  (rest-list (cdr list)))
+          (rest-list (cdr list)))
       (if (listp elem)
-	  (append (my-flatten elem) (my-flatten rest-list))
-	(append (cons elem nil) (my-flatten rest-list))))))
+          (append (my-flatten elem) (my-flatten rest-list))
+        (append (cons elem nil) (my-flatten rest-list))))))
 
 ;; p08 eliminate consecutive duplicates of list elements
 ;; if a list contains repeated elements they should be replaced with
@@ -52,11 +52,11 @@
 ;; (my-compress '(a a a a b c c a a d e e e e )) => (a b c a d e)
 (defun my-compress (list)
   (let* ((last-elem (car list))
-	 (compress-list (list last-elem)))
+         (compress-list (list last-elem)))
     (dolist (elem (cdr list))
       (unless (equal elem last-elem)
-	(setq compress-list (append compress-list (cons elem nil)))
-	(setq last-elem elem)))
+        (setq compress-list (append compress-list (cons elem nil)))
+        (setq last-elem elem)))
     compress-list))
 
 ;; p09 pack consecutive duplicates of list elements into sublists
@@ -67,13 +67,13 @@
 ;; =>((a a a a) (b) (c c) (a a) (d) (e e e e))
 (defun my-pack (list)
   (let ((sublist (list (car list)))
-	(packlist nil))
+        (packlist nil))
     (dolist (elem (cdr list))
       (if (equal elem (car sublist))
-	  (push elem sublist)
-	(progn
-	  (setq packlist (append packlist (cons sublist nil)))
-	  (setq sublist (list elem)))))
+          (push elem sublist)
+        (progn
+          (setq packlist (append packlist (cons sublist nil)))
+          (setq sublist (list elem)))))
     (setq packlist (append packlist (cons sublist nil)))
     packlist))
 
@@ -88,11 +88,11 @@
 (defun my-run-length-use-pack (list)
   "version using `my-pack'."
   (let ((packlist (my-pack list))
-	(encodelist nil))
+        (encodelist nil))
     (dolist (sublist packlist)
       (setq encodelist 
-	    (append encodelist 
-		    (cons (list (length sublist) (car sublist)) nil))))
+            (append encodelist 
+                    (cons (list (length sublist) (car sublist)) nil))))
     encodelist))
 
 ;; (my-run-length '(a a a a b c c a a d e e e e))
@@ -100,15 +100,15 @@
 (defun my-run-length (list)
   "version w/o using `my-pack'."
   (let ((lastelem (car list))
-	(packlist nil)
-	(count 1))
+        (packlist nil)
+        (count 1))
     (dolist (elem (cdr list))
       (if (equal elem lastelem)
-	  (setq count (1+ count))
-	(progn
-	  (setq packlist (append packlist (cons (list count lastelem) nil)))
-	  (setq count 1)
-	  (setq lastelem elem))))
+          (setq count (1+ count))
+        (progn
+          (setq packlist (append packlist (cons (list count lastelem) nil)))
+          (setq count 1)
+          (setq lastelem elem))))
     (setq packlist (append packlist (cons (list count lastelem) nil)))))
 
 ;; P11 Modified run-length encoding.
@@ -120,22 +120,22 @@
 ;; =>((4 a) b (2 c) (2 a) d (4 e))
 (defun my-run-length-modify (list)
   (let ((lastelem (car list))
-	(packlist nil)
-	(count 1))
+        (packlist nil)
+        (count 1))
     (dolist (elem (cdr list))
       (if (equal elem lastelem)
-	  (setq count (1+ count))
-	(progn
-	  (setq packlist (append packlist ; judegment
-				 (if (= 1 count)
-				     (cons lastelem nil)
-				   (cons (list count lastelem) nil))))
-	  (setq count 1)
-	  (setq lastelem elem))))
-    (setq packlist (append packlist	; judement
-			   (if (= 1 count)
-			       (cons lastelem nil)
-			     (cons (list count lastelem) nil))))))
+          (setq count (1+ count))
+        (progn
+          (setq packlist (append packlist ; judegment
+                                 (if (= 1 count)
+                                     (cons lastelem nil)
+                                   (cons (list count lastelem) nil))))
+          (setq count 1)
+          (setq lastelem elem))))
+    (setq packlist (append packlist     ; judement
+                           (if (= 1 count)
+                               (cons lastelem nil)
+                             (cons (list count lastelem) nil))))))
 
 
 ;; P12 Decode a run-length encoded list.
@@ -147,9 +147,9 @@
   (let (unpacklist)
     (dolist (elem list)
       (if (listp elem)
-	  (setq unpacklist (append unpacklist 
-				   (make-list (car elem) (nth 1 elem))))
-	(setq unpacklist (append unpacklist (cons elem nil)))))
+          (setq unpacklist (append unpacklist 
+                                   (make-list (car elem) (nth 1 elem))))
+        (setq unpacklist (append unpacklist (cons elem nil)))))
     unpacklist))
 
 ;; P13 Run-length encoding of a list (direct solution).
@@ -189,9 +189,9 @@
   (let ((i 1) droplist)
     (dolist (elem list)
       (if (= i n)
-	  (setq i 1)
-	(setq i (1+ i))
-	(setq droplist (append droplist (cons elem nil)))))
+          (setq i 1)
+        (setq i (1+ i))
+        (setq droplist (append droplist (cons elem nil)))))
     droplist))
 
 ;; P17 (*) Split a list into two parts; the length of the first part
@@ -246,11 +246,11 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; I prefer to use the slice function from P18.
 (defun rotate (list n)
   (let ((len (length list))
-	head tail)
+        head tail)
     (if (> n 0)
-	(progn
-	  (setq tail (my-slice list 1 n))
-	  (setq head (my-slice list (1+ n) len)))
+        (progn
+          (setq tail (my-slice list 1 n))
+          (setq head (my-slice list (1+ n) len)))
       (setq n (+ len n))
       (setq tail (my-slice list 1 n)))
       (setq head (my-slice list (1+ n) len))
@@ -292,8 +292,8 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; keywords: `random' `add-to-list'
 (defun my-random-select (list n)
   (let (indexlist
-	randomlist
-	(len (length list)))
+        randomlist
+        (len (length list)))
     (and (> n len) (setq n len))
     ;; build the index list
     ;; make sure randomlist is not empty
@@ -316,12 +316,12 @@ non-destructive version is `butlast' which uses `copy-sequence'."
   (if (<= n 0)
       nil
     (let (lotto
-	  (count n))
+          (count n))
       (unless (<= n max) (setq count max))
       ;; make sure it's not empty
       (push (1+ (random max)) lotto)
       (while (< (length lotto) count)
-	(add-to-list 'lotto (1+ (random max))))
+        (add-to-list 'lotto (1+ (random max))))
       lotto)))
 
 ;; P25 (*) Generate a random permutation of the elements of a list. 
@@ -335,9 +335,9 @@ non-destructive version is `butlast' which uses `copy-sequence'."
     (let (indexlist permulist (len (length list)))
       (push (random len) indexlist)
       (while (< (length indexlist) len)
-	(add-to-list 'indexlist (random len)))
+        (add-to-list 'indexlist (random len)))
       (dolist (index indexlist)
-	(push (nth index list) permulist))
+        (push (nth index list) permulist))
       permulist)))
 
 ;; P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list 
@@ -356,10 +356,10 @@ non-destructive version is `butlast' which uses `copy-sequence'."
   (number-sequence (1+ (- max n)) max))
 (defun my-comb+1 (list max)
   (let ((len (length list))
-	(c -1)
-	(elem (car (last list))))
+        (c -1)
+        (elem (car (last list))))
     (if (< elem max)
-	(setf (nth (1- len) list) (1+ elem))
+        (setf (nth (1- len) list) (1+ elem))
       ;; find the
 
     list))
@@ -412,12 +412,12 @@ Note that in the above example, the first two lists in the result have length 4 
 ;; (my-is-prime 24) => nil
 (defun my-is-prime (n)
   (let ((isprime t)
-	(i 2)
-	(n2 (floor (sqrt n))))
+        (i 2)
+        (n2 (floor (sqrt n))))
     (while (and (<= i n2) isprime)
       (if (zerop (% n i))
-	  (setq isprime nil)
-    	(setq i (1+ i))))
+          (setq isprime nil)
+        (setq i (1+ i))))
     isprime))
 
 
@@ -460,9 +460,13 @@ Note that in the above example, the first two lists in the result have length 4 
       (setq i (1+ i)))
     phi))
 
+;; Find out what the value of phi(m) is if m is a prime
+;; number. Euler's totient function plays an important role in one of
+;; the most widely used public key cryptography methods (RSA). In this
+;; exercise you should use the most primitive method to calculate this
+;; function (there are smarter ways that we shall discuss later).
 
-Find out what the value of phi(m) is if m is a prime number. Euler's totient function plays an important role in one of the most widely used public key cryptography methods (RSA). In this exercise you should use the most primitive method to calculate this function (there are smarter ways that we shall discuss later).
-
+;; P** Prime number sieves
 ;; Sieve of Eratosthenes
 ;; (my-sieve-of-eratosthenes 40)
 ;; (setq sieve (my-sieve-of-eratosthenes 40))
@@ -481,15 +485,15 @@ Find out what the value of phi(m) is if m is a prime number. Euler's totient fun
       ;; remove compositions
       (setq m (+ nk nk))
       (while (<= m n)
-    	(delq m primes)
-    	(setq m (+ m nk)))
+        (delq m primes)
+        (setq m (+ m nk)))
       (setq k (1+ k))
       (setq nk (nth k primes)))
     primes))
 ;; Sieve of Euler
 (defun my-sieve-of-euler (n)
   (let ((primes (list 2))
-	(i 3) j ni nj m)
+        (i 3) j ni nj m)
     (while (<= i n)
       (push i primes)
       (setq i (+ i 2)))
@@ -501,9 +505,9 @@ Find out what the value of phi(m) is if m is a prime number. Euler's totient fun
     (setq m (* ni nj))
     (while (and (< i (length primes)) (<= m n))
       (while (and (< j (length primes)) (<= m n))
-	(delq m primes)
-	(setq j (1+ j))
-	(setq nj (nth j primes)))
+        (delq m primes)
+        (setq j (1+ j))
+        (setq nj (nth j primes)))
       (setq i (1+ i))
       (setq j i)
       (setq ni (nth i primes))
@@ -522,19 +526,19 @@ Find out what the value of phi(m) is if m is a prime number. Euler's totient fun
 ;; Requirement: `my-sieve-of-eratosthenes'.
 (defun my-prime-factors (n)
   (let* ((sieve (my-sieve-of-eratosthenes n))
-	 (p (car sieve))
-	 (pfactors nil)
-	 (m 0))
+         (p (car sieve))
+         (pfactors nil)
+         (m 0))
     (while (and p (<= p n))
       (if (zerop (% n p))
-	  (setq m (1+ m)
-		n (/ n p))
-	(if (zerop m)
-	    (setq p (car (setq sieve (cdr sieve))))
-	  (setq pfactors (append pfactors (cons (list p m) nil)))
-	  (setq m 0))))
+          (setq m (1+ m)
+                n (/ n p))
+        (if (zerop m)
+            (setq p (car (setq sieve (cdr sieve))))
+          (setq pfactors (append pfactors (cons (list p m) nil)))
+          (setq m 0))))
     (unless (zerop m)
-      	  (setq pfactors (append pfactors (cons (list p m) nil))))
+          (setq pfactors (append pfactors (cons (list p m) nil))))
     pfactors))
 
 ;; P36 (**) Determine the prime factors of a given positive integer (2). 
@@ -572,8 +576,11 @@ Find out what the value of phi(m) is if m is a prime number. Euler's totient fun
 P38 (*) Compare the two methods of calculating Euler's totient function. 
 Use the solutions of problems P34 and P37 to compare the algorithms. Take the number of logical inferences as a measure for efficiency. Try to calculate phi(10090) as an example.
 
-P39 (*) A list of prime numbers. 
-Given a range of integers by its lower and upper limit, construct a list of all prime numbers in that range.
+;; P39 (*) A list of prime numbers. 
+;; Given a range of integers by its lower and upper limit, construct a
+;; list of all prime numbers in that range.
+;; Ref. P** Prime number sieves(sieve of Eratosthenes 
+;; and sieve of Euler).
 
 ;; P40 (**) Goldbach's conjecture. 
 ;; Goldbach's conjecture says that every positive even number greater
@@ -589,13 +596,13 @@ Given a range of integers by its lower and upper limit, construct a list of all 
 ;; Requirement: `my-is-prime'.
 (defun my-goldbach (n)
   (let* ((x 3) (y (- n x))
-	 pairs)
+         pairs)
     (while (<= x y)
       (if (and (my-is-prime x)
-      	       (my-is-prime y))
-      	  (push (list x y) pairs))
+               (my-is-prime y))
+          (push (list x y) pairs))
       (setq x (+ x 2)
-	    y (- y 2)))
+            y (- y 2)))
     (nreverse pairs)))
 
 ;; P41 (**) A list of Goldbach compositions. 
@@ -605,40 +612,47 @@ Given a range of integers by its lower and upper limit, construct a list of all 
 ;; (my-goldbach-list 9 20)
 (defun my-goldbach-list (n m)
   (let ((i (if (zerop (% n 2))
-	       n
-	     (1+ n)))
-	pairs
-	msg)
+               n
+             (1+ n)))
+        pairs
+        msg)
     (while (<= i m)
       (setq pairs (my-goldbach i))
       (setq msg (format "%d" i))
       (dolist (pair pairs)
-	(setq msg (concat msg (format "=%d+%d" (car pair) (cadr
-							   pair)))))
+        (setq msg (concat msg (format "=%d+%d" (car pair) (cadr
+                                                           pair)))))
       (message msg)
       (setq i (+ i 2)))))
 ;; (my-goldbach-list 9 20)
 
 
-In most cases, if an even number is written as the sum of two prime numbers, one of them is very small. Very rarely, the primes are both bigger than say 50. Try to find out how many such cases there are in the range 2..3000.
+;; In most cases, if an even number is written as the sum of two prime
+;; numbers, one of them is very small. Very rarely, the primes are
+;; both bigger than say 50. Try to find out how many such cases there
+;; are in the range 2..3000.
 
-Example (for a print limit of 50):
-* (goldbach-list 1 2000 50)
-992 = 73 + 919
-1382 = 61 + 1321
-1856 = 67 + 1789
-1928 = 61 + 1867
+;; Example (for a print limit of 50):
+;; * (goldbach-list 1 2000 50)
+;; 992 = 73 + 919
+;; 1382 = 61 + 1321
+;; 1856 = 67 + 1789
+;; 1928 = 61 + 1867
 
 
-Logic and Codes
-P46 (**) Truth tables for logical expressions. 
-Define predicates and/2, or/2, nand/2, nor/2, xor/2, impl/2 and equ/2 (for logical equivalence) which succeed or fail according to the result of their respective operations; e.g. and(A,B) will succeed, if and only if both A and B succeed. Note that A and B can be Prolog goals (not only the constants true and fail).
-A logical expression in two variables can then be written in prefix notation, as in the following example: and(or(A,B),nand(A,B)).
-
-Now, write a predicate table/3 which prints the truth table of a given logical expression in two variables.
-
-Example:
-* table(A,B,and(A,or(A,B))).
+;; Logic and Codes
+;; P46 (**) Truth tables for logical expressions. 
+;; Define predicates and/2, or/2, nand/2, nor/2, xor/2, impl/2 and
+;; equ/2 (for logical equivalence) which succeed or fail according to
+;; the result of their respective operations; e.g. and(A,B) will
+;; succeed, if and only if both A and B succeed. Note that A and B can
+;; be Prolog goals (not only the constants true and fail).
+;; A logical expression in two variables can then be written in prefix
+;; notation, as in the following example: and(or(A,B),nand(A,B)).
+;; Now, write a predicate table/3 which prints the truth table of a
+;; given logical expression in two variables.
+;; Example:
+table(A,B,and(A,or(A,B))).
 true true true
 true fail true
 fail true fail
@@ -684,10 +698,19 @@ Find out the construction rules and write a predicate with the following specifi
 
 Can you apply the method of "result caching" in order to make the predicate more efficient, when it is to be used repeatedly? 
 
-P50 (***) Huffman code. 
-First of all, consult a good book on discrete mathematics or algorithms for a detailed description of Huffman codes!
+;; P50 (***) Huffman code. 
 
-We suppose a set of symbols with their frequencies, given as a list of fr(S,F) terms. Example: [fr(a,45),fr(b,13),fr(c,12),fr(d,16),fr(e,9),fr(f,5)]. Our objective is to construct a list hc(S,C) terms, where C is the Huffman code word for the symbol S. In our example, the result could be Hs = [hc(a,'0'), hc(b,'101'), hc(c,'100'), hc(d,'111'), hc(e,'1101'), hc(f,'1100')] [hc(a,'01'),...etc.]. The task shall be performed by the predicate huffman/2 defined as follows: 
+;; First of all, consult a good book on discrete mathematics or
+;; algorithms for a detailed description of Huffman codes!
+
+;; We suppose a set of symbols with their frequencies, given as a list
+;; of fr(S,F) terms. Example:
+;; [fr(a,45),fr(b,13),fr(c,12),fr(d,16),fr(e,9),fr(f,5)]. Our
+;; objective is to construct a list hc(S,C) terms, where C is the
+;; Huffman code word for the symbol S. In our example, the result
+;; could be Hs = [hc(a,'0'), hc(b,'101'), hc(c,'100'), hc(d,'111'),
+;; hc(e,'1101'), hc(f,'1100')] [hc(a,'01'),...etc.]. The task shall be
+;; performed by the predicate huffman/2 defined as follows:
 
 % huffman(Fs,Hs) :- Hs is the Huffman code table for the frequency table Fs 
 
@@ -703,13 +726,28 @@ Other examples are a binary tree that consists of a root node only:
 
 You can check your predicates using these example trees. They are given as test cases in p54.lisp. 
 
-P54A (*) Check whether a given term represents a binary tree 
-Write a predicate istree which returns true if and only if its argument is a list representing a binary tree.
-Example:
-* (istree (a (b nil nil) nil))
-T
-* (istree (a (b nil nil)))
-NIL
+;; P54A (*) Check whether a given term represents a binary tree 
+;; Write a predicate istree which returns true if and only if its
+;; argument is a list representing a binary tree.
+;; Example:
+;; * (istree (a (b nil nil) nil))
+;; T
+;; * (istree (a (b nil nil)))
+;; NIL
+(defun my-is-binary-tree (list)
+  (if (null list)
+      t
+    (and (not (listp (car list)))       ; X is not a list(tree)
+         (listp (cadr list))            ; L is a list(tree)
+         (listp (caddr list))           ; R is a list(tree)
+         (equal (list (car list) (cadr list) (caddr list)) list) ;(X L R)
+         (my-is-binary-tree (cadr list))     ; L-subtree is a b-tree
+         (my-is-binary-tree (caddr list))))) ; R-subtree is a b-tree
+;; (my-is-binary-tree '(a (b nil nil) nil))                 ; => t
+;; (my-is-binary-tree '(a (b nil nil)))                     ; => nil
+;; (my-is-binary-tree '(a (b nil nil) (c d nil)))           ; => nil
+;; (my-is-binary-tree '(a (b nil nil) (c (d nil nil) nil))) ; => t
+;; (my-is-binary-tree '(a (b nil nil) (c d nil) nil))       ; => nil
 
 P55 (**) Construct completely balanced binary trees 
 In a completely balanced binary tree, the following property holds for every node: The number of nodes in its left subtree and the number of nodes in its right subtree are almost equal, which means their difference is not greater than one.
@@ -772,25 +810,65 @@ Now, we can attack the main problem: construct all the height-balanced binary tr
 
 Find out how many height-balanced trees exist for N = 15.
 
-P61 (*) Count the leaves of a binary tree 
-A leaf is a node with no successors. Write a predicate count-leaves/2 to count them. 
+;; P61 (*) Count the leaves of a binary tree 
+;; A leaf is a node with no successors. Write a predicate
+;; count-leaves/2 to count them. 
+;; % count-leaves(T,N) :- the binary tree T has N leaves 
+(defun my-count-leaves (tree)
+  (cond ((null tree) 
+         0)
+        ((and (null (cadr tree)) (null (caddr tree)))
+         1)
+        (t
+         (+ (my-count-leaves (cadr  tree))
+            (my-count-leaves (caddr tree))))))
+;; (my-count-leaves '(a (b nil nil) nil))
+;; (my-count-leaves '(a (b nil (a nil nil)) (c (d nil nil) nil))) => 6
 
-% count-leaves(T,N) :- the binary tree T has N leaves 
+;; P61A (*) Collect the leaves of a binary tree in a list 
+;; A leaf is a node with no successors. Write a predicate leaves/2 to
+;; collect them in a list. 
+;; % leaves(T,S) :- S is the list of all leaves of the binary tree T 
+(defun my-leaves (tree &optional leaves)
+  (cond ((null tree)
+         nil)
+        ((and (null (cadr tree)) (null (caddr tree)))
+         (cons (car tree) nil))
+        (t
+         (append (my-leaves (cadr  tree)) 
+                 (my-leaves (caddr tree))))))
+;; (my-leaves '(a (b nil nil) nil))                         => (b)
+;; (my-leaves '(a (b nil (a nil nil)) (c (d nil nil) nil))) => (a d)
 
-P61A (*) Collect the leaves of a binary tree in a list 
-A leaf is a node with no successors. Write a predicate leaves/2 to collect them in a list. 
+;; P62 (*) Collect the internal nodes of a binary tree in a list 
+;; An internal node of a binary tree has either one or two non-empty
+;; successors. Write a predicate internals/2 to collect them in a
+;; list. 
+;; % internals(T,S) :- S is the list of internal nodes of the binary
+;; tree T. 
+(defun my-internals (tree &optional internals)
+  (if (or (null tree)
+          (and (null (cadr tree)) (null (caddr tree))))
+      nil
+    (append (cons (car tree) nil)
+            (my-internals (cadr tree))
+            (my-internals (caddr tree)))))
+;; (my-internals '(a (b nil nil) nil))                         => (a)
+;; (my-internals '(a (b nil (d nil nil)) (c (e nil nil) nil))) => (a b c)
 
-% leaves(T,S) :- S is the list of all leaves of the binary tree T 
-
-P62 (*) Collect the internal nodes of a binary tree in a list 
-An internal node of a binary tree has either one or two non-empty successors. Write a predicate internals/2 to collect them in a list. 
-
-% internals(T,S) :- S is the list of internal nodes of the binary tree T. 
-
-P62B (*) Collect the nodes at a given level in a list 
-A node of a binary tree is at level N if the path from the root to the node has length N-1. The root node is at level 1. Write a predicate atlevel/3 to collect all nodes at a given level in a list. 
-
-% atlevel(T,L,S) :- S is the list of nodes of the binary tree T at level L
+;; P62B (*) Collect the nodes at a given level in a list 
+;; A node of a binary tree is at level N if the path from the root to
+;; the node has length N-1. The root node is at level 1. Write a
+;; predicate atlevel/3 to collect all nodes at a given level in a
+;; list. 
+;; % atlevel(T,L,S) :- S is the list of nodes of the binary tree T at
+;; level L
+(defun my-nodes-at-level (tree level)
+  (cond ((null tree) nil)
+        ((<= level 1) (cons (car tree) nil))
+        (t (append (my-nodes-at-level (cadr tree) (1- level))
+                   (my-nodes-at-level (caddr tree) (1- level))))))
+;; (my-nodes-at-level '(a (b nil (d nil nil)) (c (e nil nil) nil)) 2) => (b c)
 
 Using atlevel/3 it is easy to construct a predicate levelorder/2 which creates the level-order sequence of the nodes. However, there are more efficient ways to do that. 
 
@@ -1056,8 +1134,51 @@ Given a list of integer numbers, find a correct way of inserting arithmetic sign
 P94 (***) Generate K-regular simple graphs with N nodes 
 In a K-regular graph all nodes have a degree of K; i.e. the number of edges incident in each node is K. How many (non-isomorphic!) 3-regular graphs with 6 nodes are there? See also a table of results and a Java applet that can represent graphs geometrically. 
 
-P95 (**) English number words 
-On financial documents, like cheques, numbers must sometimes be written in full words. Example: 175 must be written as one-seven-five. Write a predicate full-words/1 to print (non-negative) integer numbers in full words. 
+;; P95 (**) English number words 
+;; On financial documents, like cheques, numbers must sometimes be
+;; written in full words. Example: 175 must be written as
+;; one-seven-five. Write a predicate full-words/1 to print
+;; (non-negative) integer numbers in full words. 
+(defun my-english-number-words (n)
+  "This function only works for integers that elisp supports, i.e.,
+smaller than `most-positive-fixnum'."
+  (let ((words '("zero" "one" "two" "three" "four" "five"
+                 "six" "seven" "eight" "nine" "ten"))
+        number-word)
+    ;; last digit
+    (setq number-word (nth (% n 10) words))
+    (setq n (/ n 10))
+    (while (> n 0)
+      (setq number-word (concat (nth (% n 10) words)
+                                 "-" number-word))
+      (setq n (/ n 10)))
+    number-word))
+;; (my-english-number-words 268435455)
+;; => "two-six-eight-four-three-five-four-five-five"
+(defun my-english-number-words-string-version (string-number)
+  (let (number-word)
+    (dolist (digit (split-string string-number "" t))
+      (setq number-word (concat number-word "-"
+                                (cond
+                                  ((equal digit "0") "zero")
+                                  ((equal digit "1") "one")
+                                  ((equal digit "2") "two")
+                                  ((equal digit "3") "three")
+                                  ((equal digit "4") "four")
+                                  ((equal digit "5") "five")
+                                  ((equal digit "6") "six")
+                                  ((equal digit "7") "seven")
+                                  ((equal digit "8") "eight")
+                                  ((equal digit "9") "nine")
+                                  (t (format "UNKNOWN NUMBER:%s"
+                                             digit))))))
+    ;; remove the first "-"
+    (substring number-word 1)))
+;; (my-english-number-words-string-version
+;;  "81983819834618374618273468718")
+;; => "eight-one-nine-eight-three-eight-one-nine-eight-three-four-six-one-eight-three-seven-four-six-one-eight-two-seven-three-four-six-eight-seven-one-eight"
+;; (my-english-number-words-string-version "891A-87")
+;; => "eight-nine-one-UNKNOWN NUMBER:A-UNKNOWN NUMBER:--eight-seven"
 
 P96 (**) Syntax checker (alternative solution with difference lists) 
  In a certain programming language (Ada) identifiers are defined by the syntax diagram (railroad chart) opposite. Transform the syntax diagram into a system of syntax diagrams which do not contain loops; i.e. which are purely recursive. Using these modified diagrams, write a predicate identifier/1 that can check whether or not a given string is a legal identifier.
@@ -1068,9 +1189,9 @@ P97 (**) Sudoku
 Sudoku puzzles go like this: 
    Problem statement                 Solution
 
-    .  .  4 | 8  .  . | .  1  7	     9  3  4 | 8  2  5 | 6  1  7	     
+    .  .  4 | 8  .  . | .  1  7      9  3  4 | 8  2  5 | 6  1  7             
             |         |                      |         |
-    6  7  . | 9  .  . | .  .  .	     6  7  2 | 9  1  4 | 8  5  3
+    6  7  . | 9  .  . | .  .  .      6  7  2 | 9  1  4 | 8  5  3
             |         |                      |         |
     5  .  8 | .  3  . | .  .  4      5  1  8 | 6  3  7 | 9  2  4
     --------+---------+--------      --------+---------+--------
@@ -1080,9 +1201,9 @@ Sudoku puzzles go like this:
             |         |                      |         |
     .  .  1 | .  6  9 | .  .  5      7  8  1 | 2  6  9 | 4  3  5
     --------+---------+--------      --------+---------+--------
-    1  .  . | .  8  . | 3  .  6	     1  9  7 | 5  8  2 | 3  4  6
+    1  .  . | .  8  . | 3  .  6      1  9  7 | 5  8  2 | 3  4  6
             |         |                      |         |
-    .  .  . | .  .  6 | .  9  1	     8  5  3 | 4  7  6 | 2  9  1
+    .  .  . | .  .  6 | .  9  1      8  5  3 | 4  7  6 | 2  9  1
             |         |                      |         |
     2  4  . | .  .  1 | 5  .  .      2  4  6 | 3  9  1 | 5  7  8
    
