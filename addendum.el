@@ -22,3 +22,9 @@
       fk)))
 
 (my-fibonacci 1000)
+
+;; P* set the nth element of a list
+(defun my-setnth (list n value)
+  (if (nthcdr n list)
+      (setcar (nthcdr n list) value)
+    nil))

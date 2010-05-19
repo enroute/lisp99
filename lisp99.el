@@ -4,30 +4,78 @@
 (defun my-last (list)
   (nthcdr (1- (length list)) list))
 
+;; recursive solution
+(defun my-last (list)
+  (if (cdr list)
+      (my-last (cdr list))
+    (car list)))
+
+
 ;; p02 find the last but one box of a list
 ;; example:
 ;; (my-but-last '(a b c d)) => (c d)
 (defun my-but-last (list)
   (nthcdr (- (length list) 2) list))
 
+;; recursive solution
+(defun my-but-last (list)
+  (if (cddr list)
+      (my-but-last (cdr list))
+    (car list)))
+
+
 ;; p03 find the k'th element of a list
 ;; the first element in the list is number 1.
 ;; example:
-;; (element-at '(a b c d e) 3) => c
-(defun element-at (list index)
+;; (my-element-at '(a b c d e) 3) => c
+(defun my-element-at (list index)
   (nth (1- index) list))
+
+;; recursive solution
+(defun my-element-at (list index)
+  (if (= 1 index)
+      (car list)
+    (my-element-at (cdr list) (1- index))))
+
 
 ;; p04 find the number of elements of a list
 (length '(1 2 3 4 5))
+;; recursive solution
+(defun my-number-of-elements (list)
+  (if list
+      (1+ (my-number-of-elements (cdr list)))
+    0))
+;; (my-number-of-elements '(1 2 3 4 5)) => 5
+
 
 ;; p05 reverse a list
 (reverse '(a b c d e))
+
+;; recursive solution
+(defun my-reverse (list &optional reverse)
+  (if list
+      ;; not flat list 
+      (list (my-reverse (cdr list)) (car list))
+    nil))
+;; (my-reverse '(a b c d )) => ((((nil d) c) b) a)
+
+;; solution by loop
+(defun my-reverse (list)
+  (let ((rest list)
+	reverse)
+    (while rest
+      (push (car rest) reverse)
+      (setq rest (cdr rest)))
+    reverse))
+;;(my-reverse '(a b c d e f)) => (f e d c b a)
+
 
 ;; p06 find out whether a list is a palindrome
 ;; a palindrome can be read forward or backward.
 ;; e.g. (palindrome '(x a m a x)) => t
 (defun palindrome (list)
   (equal list (reverse list)))
+
 
 ;; p07 flatten a nested list structure
 ;; transform a list, possibly holding lists as as elements into
@@ -44,6 +92,7 @@
           (append (my-flatten elem) (my-flatten rest-list))
         (append (cons elem nil) (my-flatten rest-list))))))
 
+
 ;; p08 eliminate consecutive duplicates of list elements
 ;; if a list contains repeated elements they should be replaced with
 ;; a single copy of the element. The order of the elements should not
@@ -58,6 +107,7 @@
         (setq compress-list (append compress-list (cons elem nil)))
         (setq last-elem elem)))
     compress-list))
+
 
 ;; p09 pack consecutive duplicates of list elements into sublists
 ;; if a list contains repeated elements they should be placed in
@@ -76,6 +126,7 @@
           (setq sublist (list elem)))))
     (setq packlist (append packlist (cons sublist nil)))
     packlist))
+
 
 ;; P10 run-length encoding of a list
 ;; Use the result of problem P09 to implement the so-called run-length
@@ -110,6 +161,7 @@
           (setq count 1)
           (setq lastelem elem))))
     (setq packlist (append packlist (cons (list count lastelem) nil)))))
+
 
 ;; P11 Modified run-length encoding.
 ;; Modify the result of problem P10 in such a way that if an element
@@ -152,6 +204,7 @@
         (setq unpacklist (append unpacklist (cons elem nil)))))
     unpacklist))
 
+
 ;; P13 Run-length encoding of a list (direct solution).
 ;; Implement the so-called run-length encoding data compression method
 ;; directly. I.e. don't explicitly create the sublists containing the
@@ -160,6 +213,7 @@
 ;; X) by X.
 ;; 
 ;; Already done in P11.
+
 
 ;; P14 Duplicate the elements of a list.
 ;; Example:
@@ -171,6 +225,7 @@
       (setq duplist (append duplist (list elem elem))))
     duplist))
 
+
 ;; P15 (**) Replicate the elements of a list a given number of times.
 ;; Example:
 ;; (my-replicate '(a b c) 3)
@@ -180,6 +235,7 @@
     (dolist (elem list)
       (setq replist (append replist (make-list repeat elem))))
     replist))
+
 
 ;; P16 (**) Drop every N'th element from a list.
 ;; Example:
@@ -193,6 +249,7 @@
         (setq i (1+ i))
         (setq droplist (append droplist (cons elem nil)))))
     droplist))
+
 
 ;; P17 (*) Split a list into two parts; the length of the first part
 ;; is given.
@@ -214,6 +271,7 @@ implemented just by `cdr'."
 (defun my-split (list n)
   (cons (my-split-head list n) (cons (my-split-tail list n) nil)))
 
+
 ;; P18 (**) Extract a slice from a list. 
 ;; Given two indices, I and K, the slice is the list containing the
 ;; elements between the I'th and K'th element of the original list
@@ -232,7 +290,6 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; The non-destructive version goes here.
 (defun my-slice (list begin end)
   (nthcdr (1- begin) (butlast list (- (length list) end))))
-
 
 
 ;; P19 (**) Rotate a list N places to the left. 
@@ -256,6 +313,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
       (setq head (my-slice list (1+ n) len))
     (append head tail)))
 
+
 ;; P20 (*) Remove the K'th element from a list. 
 ;; Example:
 ;; (my-remove-at '(0 1 2 3 4 5 6) 2) => (0 1 3 4 5 6)
@@ -265,6 +323,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
     (let ((removedlist (copy-sequence list)))
       (setcdr (nthcdr (1- n) removedlist) (nthcdr (1+ n) removedlist))
       removedlist)))
+
 
 ;; P21 (*) Insert an element at a given position into a list. 
 ;; Example:
@@ -276,6 +335,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
       (setq n (length list)))
     (setcdr (nthcdr (1- n) list) (cons elem (nthcdr n list))))
   list)
+
 
 ;; P22 (*) Create a list containing all integers within a given range. 
 ;; If first argument is smaller than second, produce a list in decreasing order.
@@ -304,6 +364,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
       (push (nth elem list) randomlist))
     randomlist))
 
+
 ;; P24 (*) Lotto: Draw N different random numbers from the set 1..M. 
 ;; The selected numbers shall be returned in a list.
 ;; Example:
@@ -324,6 +385,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
         (add-to-list 'lotto (1+ (random max))))
       lotto)))
 
+
 ;; P25 (*) Generate a random permutation of the elements of a list. 
 ;; Example:
 ;; (my-random-permu '(a b c d e f)) => (c f e b d a)
@@ -340,6 +402,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
         (push (nth index list) permulist))
       permulist)))
 
+
 ;; P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list 
 ;; In how many ways can a committee of 3 be chosen from a group of 12
 ;; people? We all know that there are C(12,3) = 220 possibilities
@@ -347,28 +410,52 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; mathematicians, this result may be great. But we want to really
 ;; generate all the possibilities in a list.
 ;; Example:
-(my-combination 3 '(a b c d e f))
-(defun my-combination (n list)
+;; (my-comb-list 3 '(a b c d e f)) =>
+;; ((a b c) (a b d) (a b e) (a b f) (a c d) (a c e) (a c f) (a d e) (a d f) (a e f) (b c d) (b c e) ...)
 ;;;; TODO TODO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun my-comb-init (n)
-  (number-sequence 1 n))
-(defun my-comb-max (n max)
-  (number-sequence (1+ (- max n)) max))
-(defun my-comb+1 (list max)
-  (let ((len (length list))
-        (c -1)
-        (elem (car (last list))))
-    (if (< elem max)
-        (setf (nth (1- len) list) (1+ elem))
-      ;; find the
+(defun my-comb-first (n)
+  (let ((i n)
+	first)
+    (while (> i 0)
+      (push i first)
+      (setq i (1- i)))
+    first))
+(defun my-comb-next (comb max)
+  (let ((pos (1- (length comb)))
+	(available-max max)
+	(next nil)
+	value)
+    ;; get position that can +1
+    (while (= available-max (nth pos comb))
+      (setq available-max (1- available-max)
+	    pos (1- pos)))
+    (if (< pos 0)
+	(setq next nil)
+      (setq value (1+ (car (nthcdr pos comb))))
+      (setq next (copy-sequence comb))
+      (while (< pos (length comb))
+	(setcar (nthcdr pos next) value)
+	(setq pos (1+ pos) value (1+ value))))
+    next))
+(defun my-comb-list (n list)
+  (let ((comb-index (my-comb-first n))
+	(max (length list))
+	comb
+	comb-all)
+    (while comb-index
+      ;(print comb-index)
+      (setq comb nil)
+      (dolist (i comb-index)
+	(setq comb (append comb (cons (nth (1- i) list) nil))))
+      (message "%s" comb)
+      ;; reverse order
+      ;; (push comb comb-all)
+      (setq comb-all (append comb-all (cons comb nil)))
+      (setq comb-index (my-comb-next comb-index max)))
+    comb-all))
+;; (my-comb-list 3 '(a b c d e)) =>
+;; ((a b c) (a b d) (a b e) (a c d) (a c e) (a d e) (b c d) (b c e) (b d e) (c d e))
 
-    list))
-
-    
-(setq a '(0 1 2 3 4))
-(car (last a 2))
-
-((A B C) (A B D) (A B E) ... ) 
 
 ;; P27 (**) Group the elements of a set into disjoint subsets. 
 ;; a) In how many ways can a group of 9 people work in 3 disjoint
@@ -518,6 +605,7 @@ Note that in the above example, the first two lists in the result have length 4 
   (my-sieve-of-euler n))
 ;; (my-sieve-of-euler 28) => (2 3 5 7 11 13 15 17 19 21 23 27)
 
+
 ;; P35 (**) Determine the prime factors of a given positive integer. 
 ;; Construct a flat list containing the prime factors in ascending order.
 ;; Example:
@@ -540,6 +628,7 @@ Note that in the above example, the first two lists in the result have length 4 
     (unless (zerop m)
           (setq pfactors (append pfactors (cons (list p m) nil))))
     pfactors))
+
 
 ;; P36 (**) Determine the prime factors of a given positive integer (2). 
 ;; Construct a list containing the prime factors and their multiplicity.
@@ -576,11 +665,13 @@ Note that in the above example, the first two lists in the result have length 4 
 P38 (*) Compare the two methods of calculating Euler's totient function. 
 Use the solutions of problems P34 and P37 to compare the algorithms. Take the number of logical inferences as a measure for efficiency. Try to calculate phi(10090) as an example.
 
+
 ;; P39 (*) A list of prime numbers. 
 ;; Given a range of integers by its lower and upper limit, construct a
 ;; list of all prime numbers in that range.
 ;; Ref. P** Prime number sieves(sieve of Eratosthenes 
 ;; and sieve of Euler).
+
 
 ;; P40 (**) Goldbach's conjecture. 
 ;; Goldbach's conjecture says that every positive even number greater
@@ -604,6 +695,7 @@ Use the solutions of problems P34 and P37 to compare the algorithms. Take the nu
       (setq x (+ x 2)
             y (- y 2)))
     (nreverse pairs)))
+
 
 ;; P41 (**) A list of Goldbach compositions. 
 ;; Given a range of integers by its lower and upper limit, print a
