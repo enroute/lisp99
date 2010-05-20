@@ -462,20 +462,59 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; subgroups of 2, 3 and 4 persons? Write a function that generates
 ;; all the possibilities and returns them in a list.
 ;; Example:
-* (group3 '(aldo beat carla david evi flip gary hugo ida))
-( ( (ALDO BEAT) (CARLA DAVID EVI) (FLIP GARY HUGO IDA) )
-... )
+;; * (group3 '(aldo beat carla david evi flip gary hugo ida))
+;; ( ( (ALDO BEAT) (CARLA DAVID EVI) (FLIP GARY HUGO IDA) )
+;; ... )
 
-b) Generalize the above predicate in a way that we can specify a list of group sizes and the predicate will return a list of groups.
+;; b) Generalize the above predicate in a way that we can specify a list of group sizes and the predicate will return a list of groups.
 
-Example:
-* (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))
-( ( (ALDO BEAT) (CARLA DAVID) (EVI FLIP GARY HUGO IDA) )
-... )
+;; Example:
+;; * (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))
+;; ( ( (ALDO BEAT) (CARLA DAVID) (EVI FLIP GARY HUGO IDA) )
+;; ... )
 
-Note that we do not want permutations of the group members; i.e. ((ALDO BEAT) ...) is the same solution as ((BEAT ALDO) ...). However, we make a difference between ((ALDO BEAT) (CARLA DAVID) ...) and ((CARLA DAVID) (ALDO BEAT) ...).
+;; Requirement: `my-comb-first' and `my-comb-next' in P26, and
+;; `my-index-to-value' defined as the following.
+(defun my-index-to-value (list index)
+  (let (values)
+    (dolist (i (reverse index))
+      (push (nth (1- i) list) values))
+    values))
+(defun my-group (list group &optional head)
+  "HEAD: groups(inside one combination) colleted so far."
+  (cond ((or (null list) (null group)) nil)
+	((= (length list) (car group))
+	 ;; one of the combinations
+	 (message "%s" (append head (cons list nil))))
+	(t
+	 (let ((comb (my-comb-first (car group)))
+	       (listcopy (copy-sequence list))
+	       (max (length list))
+	       values)
+	   (while comb
+	     (setq values (my-index-to-value list comb))
+	     (dolist (elem values)
+	       (setq listcopy (delete elem listcopy)))
+	     (my-group listcopy (cdr group) (append head (cons values nil)))
+	     (setq comb (my-comb-next comb max))
+	     (setq listcopy (copy-sequence list)))))))
+;; (my-group '(a b c d) '(2 2)) =>
+;; the output (not the return value) is:
+;; ((a b) (c d))
+;; ((a c) (b d))
+;; ((a d) (b c))
+;; ((b c) (a d))
+;; ((b d) (a c))
+;; ((c d) (a b))
 
-You may find more about this combinatorial problem in a good book on discrete mathematics under the term "multinomial coefficients". 
+;; Note that we do not want permutations of the group members;
+;; i.e. ((ALDO BEAT) ...) is the same solution as ((BEAT ALDO)
+;; ...). However, we make a difference between ((ALDO BEAT) (CARLA
+;; DAVID) ...) and ((CARLA DAVID) (ALDO BEAT) ...).
+
+;; You may find more about this combinatorial problem in a good book
+;; on discrete mathematics under the term "multinomial coefficients". 
+
 
 P28 (**) Sorting a list of lists according to length of sublists 
 a) We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
