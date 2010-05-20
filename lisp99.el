@@ -54,7 +54,7 @@
 ;; recursive solution
 (defun my-reverse (list &optional reverse)
   (if list
-      ;; not flat list 
+      ;; not flat list
       (list (my-reverse (cdr list)) (car list))
     nil))
 ;; (my-reverse '(a b c d )) => ((((nil d) c) b) a)
@@ -72,9 +72,23 @@
 
 ;; p06 find out whether a list is a palindrome
 ;; a palindrome can be read forward or backward.
-;; e.g. (palindrome '(x a m a x)) => t
-(defun palindrome (list)
+;; e.g. (my-palindrome '(x a m a x)) => t
+(defun my-palindrome (list)
   (equal list (reverse list)))
+
+;; recursive solution
+(defun my-palindrom (list &optional start end)
+  (or start (setq start 0))
+  (or end (setq end (1- (length list))))
+  (cond ((>= start end)
+         t)
+        ((equal (nth start list) (nth end list))
+         (my-palindrom list (1+ start) (1- end)))
+        (t
+         nil)))
+;; (my-palindrom '(x a m a x)) => t
+;; (my-palindrom '(x a m a v)) => nil
+;; (my-palindrom '(x a m a))   => nil
 
 
 ;; p07 flatten a nested list structure
@@ -108,6 +122,15 @@
         (setq last-elem elem)))
     compress-list))
 
+;; recursive solution
+(defun my-compress (list)
+  (if (cdr list)
+      (if (equal (car list) (cadr list))
+          (my-compress (cdr list))
+        (append (cons (car list) nil) (my-compress (cdr list))))
+    list))
+;; (my-compress '(a a a a b c c a a d e e e e )) => (a b c a d e)
+
 
 ;; p09 pack consecutive duplicates of list elements into sublists
 ;; if a list contains repeated elements they should be placed in
@@ -127,6 +150,28 @@
     (setq packlist (append packlist (cons sublist nil)))
     packlist))
 
+;; The following three solutions were  taken from
+;; http://www.perlmonks.org/?node_id=590126
+;; With loop
+(defun pack(lst &optional groups)
+  (loop for el in lst
+        for first-group = (when (equal el (caar groups)) (pop groups))
+        do (push (cons el first-group) groups))
+  (reverse groups))
+;;With recursion:
+(defun pack(lst &optional groups)
+  (if (not lst) (reverse groups)
+      (let* ((el (pop lst))
+             (first-group (when (equal el (caar groups)) (pop groups))))
+        (pack lst (cons (cons el first-group) groups)))))
+;; With no mercy
+(defun pack (lst &optional g)
+  (if (not lst)
+      (reverse g)
+    (pack (cdr lst)
+          (cons (cons (car lst) (when (equal (car lst) (caar g)) (pop g))) g))))
+;; (pack '(a a a b c c)) => ((a a a) (b) (c c))
+
 
 ;; P10 run-length encoding of a list
 ;; Use the result of problem P09 to implement the so-called run-length
@@ -141,8 +186,8 @@
   (let ((packlist (my-pack list))
         (encodelist nil))
     (dolist (sublist packlist)
-      (setq encodelist 
-            (append encodelist 
+      (setq encodelist
+            (append encodelist
                     (cons (list (length sublist) (car sublist)) nil))))
     encodelist))
 
@@ -199,7 +244,7 @@
   (let (unpacklist)
     (dolist (elem list)
       (if (listp elem)
-          (setq unpacklist (append unpacklist 
+          (setq unpacklist (append unpacklist
                                    (make-list (car elem) (nth 1 elem))))
         (setq unpacklist (append unpacklist (cons elem nil)))))
     unpacklist))
@@ -211,7 +256,7 @@
 ;; duplicates, as in problem P09, but only count them. As in problem
 ;; P11, simplify the result list by replacing the singleton lists (1
 ;; X) by X.
-;; 
+;;
 ;; Already done in P11.
 
 
@@ -272,7 +317,7 @@ implemented just by `cdr'."
   (cons (my-split-head list n) (cons (my-split-tail list n) nil)))
 
 
-;; P18 (**) Extract a slice from a list. 
+;; P18 (**) Extract a slice from a list.
 ;; Given two indices, I and K, the slice is the list containing the
 ;; elements between the I'th and K'th element of the original list
 ;; (both limits included). Start counting the elements with 1.
@@ -292,7 +337,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
   (nthcdr (1- begin) (butlast list (- (length list) end))))
 
 
-;; P19 (**) Rotate a list N places to the left. 
+;; P19 (**) Rotate a list N places to the left.
 ;; Examples:
 ;; (rotate '(a b c d e f g h) 3)
 ;; => (d e f g h a b c)
@@ -314,7 +359,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
     (append head tail)))
 
 
-;; P20 (*) Remove the K'th element from a list. 
+;; P20 (*) Remove the K'th element from a list.
 ;; Example:
 ;; (my-remove-at '(0 1 2 3 4 5 6) 2) => (0 1 3 4 5 6)
 (defun my-remove-at (list n)
@@ -325,7 +370,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
       removedlist)))
 
 
-;; P21 (*) Insert an element at a given position into a list. 
+;; P21 (*) Insert an element at a given position into a list.
 ;; Example:
 ;; (my-insert-at 'alfa '(a b c d) 1) => (a alfa b c d)
 (defun my-insert-at (elem list n)
@@ -337,7 +382,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
   list)
 
 
-;; P22 (*) Create a list containing all integers within a given range. 
+;; P22 (*) Create a list containing all integers within a given range.
 ;; If first argument is smaller than second, produce a list in decreasing order.
 ;; Example:
 ;; (range 4 9) => (4 5 6 7 8 9)
@@ -345,7 +390,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; Please refer to `number-sequence' at subr.el.
 
 
-;; P23 (**) Extract a given number of randomly selected elements from a list. 
+;; P23 (**) Extract a given number of randomly selected elements from a list.
 ;; The selected items shall be returned in a list.
 ;; Example:
 ;; (my-random-select '(a b c d e f g h) 4) => (c d f e)
@@ -365,7 +410,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
     randomlist))
 
 
-;; P24 (*) Lotto: Draw N different random numbers from the set 1..M. 
+;; P24 (*) Lotto: Draw N different random numbers from the set 1..M.
 ;; The selected numbers shall be returned in a list.
 ;; Example:
 ;; (my-lotto-select 6 10) => (2 8 5 6 1 3)
@@ -386,7 +431,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
       lotto)))
 
 
-;; P25 (*) Generate a random permutation of the elements of a list. 
+;; P25 (*) Generate a random permutation of the elements of a list.
 ;; Example:
 ;; (my-random-permu '(a b c d e f)) => (c f e b d a)
 (my-random-permu 3)
@@ -403,7 +448,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
       permulist)))
 
 
-;; P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list 
+;; P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list
 ;; In how many ways can a committee of 3 be chosen from a group of 12
 ;; people? We all know that there are C(12,3) = 220 possibilities
 ;; (C(N,K) denotes the well-known binomial coefficients). For pure
@@ -457,7 +502,7 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; ((a b c) (a b d) (a b e) (a c d) (a c e) (a d e) (b c d) (b c e) (b d e) (c d e))
 
 
-;; P27 (**) Group the elements of a set into disjoint subsets. 
+;; P27 (**) Group the elements of a set into disjoint subsets.
 ;; a) In how many ways can a group of 9 people work in 3 disjoint
 ;; subgroups of 2, 3 and 4 persons? Write a function that generates
 ;; all the possibilities and returns them in a list.
@@ -513,10 +558,10 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; DAVID) ...) and ((CARLA DAVID) (ALDO BEAT) ...).
 
 ;; You may find more about this combinatorial problem in a good book
-;; on discrete mathematics under the term "multinomial coefficients". 
+;; on discrete mathematics under the term "multinomial coefficients".
 
 
-P28 (**) Sorting a list of lists according to length of sublists 
+P28 (**) Sorting a list of lists according to length of sublists
 a) We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
 
 Example:
@@ -529,10 +574,10 @@ Example:
 * (lfsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
 ((i j k l) (o) (a b c) (f g h) (d e) (d e) (m n))
 
-Note that in the above example, the first two lists in the result have length 4 and 1, both lengths appear just once. The third and forth list have length 3 which appears twice (there are two list of this length). And finally, the last three lists have length 2. This is the most frequent length. 
+Note that in the above example, the first two lists in the result have length 4 and 1, both lengths appear just once. The third and forth list have length 3 which appears twice (there are two list of this length). And finally, the last three lists have length 2. This is the most frequent length.
 
 ;; Arithmetic
-;; P31 (**) Determine whether a given integer number is prime. 
+;; P31 (**) Determine whether a given integer number is prime.
 ;; Example:
 ;; (my-is-prime 19) => t
 ;; (my-is-prime 24) => nil
@@ -547,7 +592,7 @@ Note that in the above example, the first two lists in the result have length 4 
     isprime))
 
 
-;; P32 (**) Determine the greatest common divisor of two positive integer numbers. 
+;; P32 (**) Determine the greatest common divisor of two positive integer numbers.
 ;; Use Euclid's algorithm.
 ;; Example:
 ;; (my-gcd 36 63) => 9
@@ -561,7 +606,7 @@ Note that in the above example, the first two lists in the result have length 4 
       (setq m n))
     n))
 
-;; P33 (*) Determine whether two positive integer numbers are coprime. 
+;; P33 (*) Determine whether two positive integer numbers are coprime.
 ;; Two numbers are coprime if their greatest common divisor equals 1.
 ;; Example:
 ;; (my-coprime 35 64) => t
@@ -571,7 +616,7 @@ Note that in the above example, the first two lists in the result have length 4 
       t
     nil))
 
-;; P34 (**) Calculate Euler's totient function phi(m). 
+;; P34 (**) Calculate Euler's totient function phi(m).
 ;; Euler's so-called totient function phi(m) is defined as the number
 ;; of positive integers r (1 <= r < m) that are coprime to m.
 ;; Example: m = 10: r = 1,3,7,9; thus phi(m) = 4. Note the special
@@ -645,7 +690,7 @@ Note that in the above example, the first two lists in the result have length 4 
 ;; (my-sieve-of-euler 28) => (2 3 5 7 11 13 15 17 19 21 23 27)
 
 
-;; P35 (**) Determine the prime factors of a given positive integer. 
+;; P35 (**) Determine the prime factors of a given positive integer.
 ;; Construct a flat list containing the prime factors in ascending order.
 ;; Example:
 ;; (my-prime-factors 315) => ((3 2) (5 1) (7 1))
@@ -669,16 +714,16 @@ Note that in the above example, the first two lists in the result have length 4 
     pfactors))
 
 
-;; P36 (**) Determine the prime factors of a given positive integer (2). 
+;; P36 (**) Determine the prime factors of a given positive integer (2).
 ;; Construct a list containing the prime factors and their multiplicity.
 ;; Example:
 ;; (my-prime-factors-mult 315)
 ;; ((3 2) (5 1) (7 1))
 ;; Hint: The problem is similar to problem
 ;; Ref. P35.
-    
 
-;; P37 (**) Calculate Euler's totient function phi(m) (improved). 
+
+;; P37 (**) Calculate Euler's totient function phi(m) (improved).
 ;; See problem P34 for the definition of Euler's totient function. If
 ;; the list of the prime factors of a number m is known in the form of
 ;; problem P36 then the function phi(m) can be efficiently calculated
@@ -701,18 +746,18 @@ Note that in the above example, the first two lists in the result have length 4 
 ;; (my-phi-improved '((2 3) (3 2) (5 1))) => 22
 
 
-P38 (*) Compare the two methods of calculating Euler's totient function. 
+P38 (*) Compare the two methods of calculating Euler's totient function.
 Use the solutions of problems P34 and P37 to compare the algorithms. Take the number of logical inferences as a measure for efficiency. Try to calculate phi(10090) as an example.
 
 
-;; P39 (*) A list of prime numbers. 
+;; P39 (*) A list of prime numbers.
 ;; Given a range of integers by its lower and upper limit, construct a
 ;; list of all prime numbers in that range.
-;; Ref. P** Prime number sieves(sieve of Eratosthenes 
+;; Ref. P** Prime number sieves(sieve of Eratosthenes
 ;; and sieve of Euler).
 
 
-;; P40 (**) Goldbach's conjecture. 
+;; P40 (**) Goldbach's conjecture.
 ;; Goldbach's conjecture says that every positive even number greater
 ;; than 2 is the sum of two prime numbers. Example: 28 = 5 + 23. It is
 ;; one of the most famous facts in number theory that has not been
@@ -736,7 +781,7 @@ Use the solutions of problems P34 and P37 to compare the algorithms. Take the nu
     (nreverse pairs)))
 
 
-;; P41 (**) A list of Goldbach compositions. 
+;; P41 (**) A list of Goldbach compositions.
 ;; Given a range of integers by its lower and upper limit, print a
 ;; list of all even numbers and their Goldbach composition.
 ;; Example:
@@ -772,7 +817,7 @@ Use the solutions of problems P34 and P37 to compare the algorithms. Take the nu
 
 
 ;; Logic and Codes
-;; P46 (**) Truth tables for logical expressions. 
+;; P46 (**) Truth tables for logical expressions.
 ;; Define predicates and/2, or/2, nand/2, nor/2, xor/2, impl/2 and
 ;; equ/2 (for logical equivalence) which succeed or fail according to
 ;; the result of their respective operations; e.g. and(A,B) will
@@ -791,7 +836,7 @@ fail fail fail
 
 
 
-P47 (*) Truth tables for logical expressions (2). 
+P47 (*) Truth tables for logical expressions (2).
 Continue problem P46 by defining and/2, or/2, etc as being operators. This allows to write the logical expression in the more natural way, as in the example: A and (A or not B). Define operator precedence as usual; i.e. as in Java.
 Example:
 * table(A,B, A and (A or not B)).
@@ -802,7 +847,7 @@ fail fail fail
 
 
 
-P48 (**) Truth tables for logical expressions (3). 
+P48 (**) Truth tables for logical expressions (3).
 Generalize problem P47 in such a way that the logical expression may contain any number of logical variables. Define table/2 in a way that table(List,Expr) prints the truth table for the expression Expr, which contains the logical variables enumerated in List.
 Example:
 * table([A,B,C], A and (B or C) equ A and B or A and C).
@@ -817,7 +862,7 @@ fail fail fail true
 
 
 
-P49 (**) Gray code. 
+P49 (**) Gray code.
 An n-bit Gray code is a sequence of n-bit strings constructed according to certain rules. For example,
 n = 1: C(1) = ['0','1'].
 n = 2: C(2) = ['00','01','11','10'].
@@ -827,9 +872,9 @@ Find out the construction rules and write a predicate with the following specifi
 
 % gray(N,C) :- C is the N-bit Gray code
 
-Can you apply the method of "result caching" in order to make the predicate more efficient, when it is to be used repeatedly? 
+Can you apply the method of "result caching" in order to make the predicate more efficient, when it is to be used repeatedly?
 
-;; P50 (***) Huffman code. 
+;; P50 (***) Huffman code.
 
 ;; First of all, consult a good book on discrete mathematics or
 ;; algorithms for a detailed description of Huffman codes!
@@ -843,21 +888,21 @@ Can you apply the method of "result caching" in order to make the predicate more
 ;; hc(e,'1101'), hc(f,'1100')] [hc(a,'01'),...etc.]. The task shall be
 ;; performed by the predicate huffman/2 defined as follows:
 
-% huffman(Fs,Hs) :- Hs is the Huffman code table for the frequency table Fs 
+% huffman(Fs,Hs) :- Hs is the Huffman code table for the frequency table Fs
 
 Binary Trees
-A binary tree is either empty or it is composed of a root element and two successors, which are binary trees themselves.  
-In Lisp we represent the empty tree by 'nil' and the non-empty tree by the list (X L R), where X denotes the root node and L and R denote the left and right subtree, respectively. The example tree depicted opposite is therefore represented by the following list: 
+A binary tree is either empty or it is composed of a root element and two successors, which are binary trees themselves.
+In Lisp we represent the empty tree by 'nil' and the non-empty tree by the list (X L R), where X denotes the root node and L and R denote the left and right subtree, respectively. The example tree depicted opposite is therefore represented by the following list:
 
-(a (b (d nil nil) (e nil nil)) (c nil (f (g nil nil) nil))) 
+(a (b (d nil nil) (e nil nil)) (c nil (f (g nil nil) nil)))
 
 Other examples are a binary tree that consists of a root node only:
 
-(a nil nil) or an empty binary tree: nil. 
+(a nil nil) or an empty binary tree: nil.
 
-You can check your predicates using these example trees. They are given as test cases in p54.lisp. 
+You can check your predicates using these example trees. They are given as test cases in p54.lisp.
 
-;; P54A (*) Check whether a given term represents a binary tree 
+;; P54A (*) Check whether a given term represents a binary tree
 ;; Write a predicate istree which returns true if and only if its
 ;; argument is a list representing a binary tree.
 ;; Example:
@@ -880,7 +925,7 @@ You can check your predicates using these example trees. They are given as test 
 ;; (my-is-binary-tree '(a (b nil nil) (c (d nil nil) nil))) ; => t
 ;; (my-is-binary-tree '(a (b nil nil) (c d nil) nil))       ; => nil
 
-P55 (**) Construct completely balanced binary trees 
+P55 (**) Construct completely balanced binary trees
 In a completely balanced binary tree, the following property holds for every node: The number of nodes in its left subtree and the number of nodes in its right subtree are almost equal, which means their difference is not greater than one.
 
 Write a function cbal-tree to construct completely balanced binary trees for a given number of nodes. The predicate should generate all solutions via backtracking. Put the letter 'x' as information into all nodes of the tree.
@@ -890,10 +935,10 @@ T = t(x, t(x, nil, nil), t(x, nil, t(x, nil, nil))) ;
 T = t(x, t(x, nil, nil), t(x, t(x, nil, nil), nil)) ;
 etc......No
 
-P56 (**) Symmetric binary trees 
+P56 (**) Symmetric binary trees
 Let us call a binary tree symmetric if you can draw a vertical line through the root node and then the right subtree is the mirror image of the left subtree. Write a predicate symmetric/1 to check whether a given binary tree is symmetric. Hint: Write a predicate mirror/2 first to check whether one tree is the mirror image of another. We are only interested in the structure, not in the contents of the nodes.
 
-P57 (**) Binary search trees (dictionaries) 
+P57 (**) Binary search trees (dictionaries)
 Use the predicate add/3, developed in chapter 4 of the course, to write a predicate to construct a binary search tree from a list of integer numbers.
 Example:
 * construct([3,2,5,7,1],T).
@@ -906,14 +951,14 @@ Yes
 * test-symmetric([3,2,5,7,1]).
 No
 
-P58 (**) Generate-and-test paradigm 
+P58 (**) Generate-and-test paradigm
 Apply the generate-and-test paradigm to construct all symmetric, completely balanced binary trees with a given number of nodes. Example:
 * sym-cbal-trees(5,Ts).
-Ts = [t(x, t(x, nil, t(x, nil, nil)), t(x, t(x, nil, nil), nil)), t(x, t(x, t(x, nil, nil), nil), t(x, nil, t(x, nil, nil)))] 
+Ts = [t(x, t(x, nil, t(x, nil, nil)), t(x, t(x, nil, nil), nil)), t(x, t(x, t(x, nil, nil), nil), t(x, nil, t(x, nil, nil)))]
 
 How many such trees are there with 57 nodes? Investigate about how many solutions there are for a given number of nodes? What if the number is even? Write an appropriate predicate.
 
-P59 (**) Construct height-balanced binary trees 
+P59 (**) Construct height-balanced binary trees
 In a height-balanced binary tree, the following property holds for every node: The height of its left subtree and the height of its right subtree are almost equal, which means their difference is not greater than one.
 
 Write a predicate hbal-tree/2 to construct height-balanced binary trees for a given height. The predicate should generate all solutions via backtracking. Put the letter 'x' as information into all nodes of the tree.
@@ -923,7 +968,7 @@ T = t(x, t(x, t(x, nil, nil), t(x, nil, nil)), t(x, t(x, nil, nil), t(x, nil, ni
 T = t(x, t(x, t(x, nil, nil), t(x, nil, nil)), t(x, t(x, nil, nil), nil)) ;
 etc......No
 
-P60 (**) Construct height-balanced binary trees with a given number of nodes 
+P60 (**) Construct height-balanced binary trees with a given number of nodes
 Consider a height-balanced binary tree of height H. What is the maximum number of nodes it can contain?
 Clearly, MaxN = 2**H - 1. However, what is the minimum number MinN? This question is more difficult. Try to find a recursive statement and turn it into a predicate minNodes/2 defined as follwos:
 
@@ -941,12 +986,12 @@ Now, we can attack the main problem: construct all the height-balanced binary tr
 
 Find out how many height-balanced trees exist for N = 15.
 
-;; P61 (*) Count the leaves of a binary tree 
+;; P61 (*) Count the leaves of a binary tree
 ;; A leaf is a node with no successors. Write a predicate
-;; count-leaves/2 to count them. 
-;; % count-leaves(T,N) :- the binary tree T has N leaves 
+;; count-leaves/2 to count them.
+;; % count-leaves(T,N) :- the binary tree T has N leaves
 (defun my-count-leaves (tree)
-  (cond ((null tree) 
+  (cond ((null tree)
          0)
         ((and (null (cadr tree)) (null (caddr tree)))
          1)
@@ -956,27 +1001,27 @@ Find out how many height-balanced trees exist for N = 15.
 ;; (my-count-leaves '(a (b nil nil) nil))
 ;; (my-count-leaves '(a (b nil (a nil nil)) (c (d nil nil) nil))) => 6
 
-;; P61A (*) Collect the leaves of a binary tree in a list 
+;; P61A (*) Collect the leaves of a binary tree in a list
 ;; A leaf is a node with no successors. Write a predicate leaves/2 to
-;; collect them in a list. 
-;; % leaves(T,S) :- S is the list of all leaves of the binary tree T 
+;; collect them in a list.
+;; % leaves(T,S) :- S is the list of all leaves of the binary tree T
 (defun my-leaves (tree &optional leaves)
   (cond ((null tree)
          nil)
         ((and (null (cadr tree)) (null (caddr tree)))
          (cons (car tree) nil))
         (t
-         (append (my-leaves (cadr  tree)) 
+         (append (my-leaves (cadr  tree))
                  (my-leaves (caddr tree))))))
 ;; (my-leaves '(a (b nil nil) nil))                         => (b)
 ;; (my-leaves '(a (b nil (a nil nil)) (c (d nil nil) nil))) => (a d)
 
-;; P62 (*) Collect the internal nodes of a binary tree in a list 
+;; P62 (*) Collect the internal nodes of a binary tree in a list
 ;; An internal node of a binary tree has either one or two non-empty
 ;; successors. Write a predicate internals/2 to collect them in a
-;; list. 
+;; list.
 ;; % internals(T,S) :- S is the list of internal nodes of the binary
-;; tree T. 
+;; tree T.
 (defun my-internals (tree &optional internals)
   (if (or (null tree)
           (and (null (cadr tree)) (null (caddr tree))))
@@ -987,11 +1032,11 @@ Find out how many height-balanced trees exist for N = 15.
 ;; (my-internals '(a (b nil nil) nil))                         => (a)
 ;; (my-internals '(a (b nil (d nil nil)) (c (e nil nil) nil))) => (a b c)
 
-;; P62B (*) Collect the nodes at a given level in a list 
+;; P62B (*) Collect the nodes at a given level in a list
 ;; A node of a binary tree is at level N if the path from the root to
 ;; the node has length N-1. The root node is at level 1. Write a
 ;; predicate atlevel/3 to collect all nodes at a given level in a
-;; list. 
+;; list.
 ;; % atlevel(T,L,S) :- S is the list of nodes of the binary tree T at
 ;; level L
 (defun my-nodes-at-level (tree level)
@@ -1001,57 +1046,57 @@ Find out how many height-balanced trees exist for N = 15.
                    (my-nodes-at-level (caddr tree) (1- level))))))
 ;; (my-nodes-at-level '(a (b nil (d nil nil)) (c (e nil nil) nil)) 2) => (b c)
 
-Using atlevel/3 it is easy to construct a predicate levelorder/2 which creates the level-order sequence of the nodes. However, there are more efficient ways to do that. 
+Using atlevel/3 it is easy to construct a predicate levelorder/2 which creates the level-order sequence of the nodes. However, there are more efficient ways to do that.
 
-P63 (**) Construct a complete binary tree 
+P63 (**) Construct a complete binary tree
 A complete binary tree with height H is defined as follows: The levels 1,2,3,...,H-1 contain the maximum number of nodes (i.e 2**(i-1) at the level i, note that we start counting the levels from 1 at the root). In level H, which may contain less than the maximum possible number of nodes, all the nodes are "left-adjusted". This means that in a levelorder tree traversal all internal nodes come first, the leaves come second, and empty successors (the nil's which are not really nodes!) come last.
 
 Particularly, complete binary trees are used as data structures (or addressing schemes) for heaps.
 
-We can assign an address number to each node in a complete binary tree by enumerating the nodes in levelorder, starting at the root with number 1. In doing so, we realize that for every node X with address A the following property holds: The address of X's left and right successors are 2*A and 2*A+1, respectively, supposed the successors do exist. This fact can be used to elegantly construct a complete binary tree structure. Write a predicate complete-binary-tree/2 with the following specification: 
+We can assign an address number to each node in a complete binary tree by enumerating the nodes in levelorder, starting at the root with number 1. In doing so, we realize that for every node X with address A the following property holds: The address of X's left and right successors are 2*A and 2*A+1, respectively, supposed the successors do exist. This fact can be used to elegantly construct a complete binary tree structure. Write a predicate complete-binary-tree/2 with the following specification:
 
 % complete-binary-tree(N,T) :- T is a complete binary tree with N nodes. (+,?)
 
 Test your predicate in an appropriate way.
 
-P64 (**) Layout a binary tree (1) 
+P64 (**) Layout a binary tree (1)
 Given a binary tree as the usual Prolog term t(X,L,R) (or nil). As a preparation for drawing the tree, a layout algorithm is required to determine the position of each node in a rectangular grid. Several layout methods are conceivable, one of them is shown in the illustration below.
 
  In this layout strategy, the position of a node v is obtained by the following two rules:
 
 
-x(v) is equal to the position of the node v in the inorder sequence 
-y(v) is equal to the depth of the node v in the tree 
+x(v) is equal to the position of the node v in the inorder sequence
+y(v) is equal to the depth of the node v in the tree
 
 
-In order to store the position of the nodes, we extend the Prolog term representing a node (and its successors) as follows: 
+In order to store the position of the nodes, we extend the Prolog term representing a node (and its successors) as follows:
 
 % nil represents the empty tree (as usual)
 % t(W,X,Y,L,R) represents a (non-empty) binary tree with root W "positioned" at (X,Y), and subtrees L and R
 
-Write a predicate layout-binary-tree/2 with the following specification: 
+Write a predicate layout-binary-tree/2 with the following specification:
 
 % layout-binary-tree(T,PT) :- PT is the "positioned" binary tree obtained from the binary tree T. (+,?)
 
-Test your predicate in an appropriate way. 
+Test your predicate in an appropriate way.
 
 
-P65 (**) Layout a binary tree (2) 
+P65 (**) Layout a binary tree (2)
  An alternative layout method is depicted in the illustration opposite. Find out the rules and write the corresponding Prolog predicate. Hint: On a given level, the horizontal distance between neighboring nodes is constant.
 
-Use the same conventions as in problem P64 and test your predicate in an appropriate way. 
+Use the same conventions as in problem P64 and test your predicate in an appropriate way.
 
 
-P66 (***) Layout a binary tree (3) 
+P66 (***) Layout a binary tree (3)
  Yet another layout strategy is shown in the illustration opposite. The method yields a very compact layout while maintaining a certain symmetry in every node. Find out the rules and write the corresponding Prolog predicate. Hint: Consider the horizontal distance between a node and its successor nodes. How tight can you pack together two subtrees to construct the combined binary tree?
 
 Use the same conventions as in problem P64 and P65 and test your predicate in an appropriate way. Note: This is a difficult problem. Don't give up too early!
 
-Which layout do you like most? 
+Which layout do you like most?
 
 
-P67 (**) A string representation of binary trees 
- 
+P67 (**) A string representation of binary trees
+
 Somebody represents binary trees as strings of the following type (see example opposite):
 
 a(b(d,e),c(,f(g,)))
@@ -1060,10 +1105,10 @@ a) Write a Prolog predicate which generates this string representation, if the t
 
 b) Write the same predicate tree-string/2 using difference lists and a single predicate tree-dlist/2 which does the conversion between a tree and a difference list in both directions.
 
-For simplicity, suppose the information in the nodes is a single letter and there are no spaces in the string. 
+For simplicity, suppose the information in the nodes is a single letter and there are no spaces in the string.
 
 
-P68 (**) Preorder and inorder sequences of binary trees 
+P68 (**) Preorder and inorder sequences of binary trees
 We consider binary trees with nodes that are identified by single lower-case letters, as in the example of problem P67.
 
 a) Write predicates preorder/2 and inorder/2 that construct the preorder and inorder sequence of a given binary tree, respectively. The results should be atoms, e.g. 'abdecfg' for the preorder sequence of the example in problem P67.
@@ -1074,29 +1119,29 @@ c) If both the preorder sequence and the inorder sequence of the nodes of a bina
 
 d) Solve problems a) to c) using difference lists. Cool! Use the predefined predicate time/1 to compare the solutions.
 
-What happens if the same character appears in more than one node. Try for instance pre-in-tree(aba,baa,T). 
+What happens if the same character appears in more than one node. Try for instance pre-in-tree(aba,baa,T).
 
-P69 (**) Dotstring representation of binary trees 
-We consider again binary trees with nodes that are identified by single lower-case letters, as in the example of problem P67. Such a tree can be represented by the preorder sequence of its nodes in which dots (.) are inserted where an empty subtree (nil) is encountered during the tree traversal. For example, the tree shown in problem P67 is represented as 'abd..e..c.fg...'. First, try to establish a syntax (BNF or syntax diagrams) and then write a predicate tree-dotstring/2 which does the conversion in both directions. Use difference lists. 
+P69 (**) Dotstring representation of binary trees
+We consider again binary trees with nodes that are identified by single lower-case letters, as in the example of problem P67. Such a tree can be represented by the preorder sequence of its nodes in which dots (.) are inserted where an empty subtree (nil) is encountered during the tree traversal. For example, the tree shown in problem P67 is represented as 'abd..e..c.fg...'. First, try to establish a syntax (BNF or syntax diagrams) and then write a predicate tree-dotstring/2 which does the conversion in both directions. Use difference lists.
 
 Multiway Trees
-A multiway tree is composed of a root element and a (possibly empty) set of successors which are multiway trees themselves. A multiway tree is never empty. The set of successor trees is sometimes called a forest. 
+A multiway tree is composed of a root element and a (possibly empty) set of successors which are multiway trees themselves. A multiway tree is never empty. The set of successor trees is sometimes called a forest.
 
- 
-In Prolog we represent a multiway tree by a term t(X,F), where X denotes the root node and F denotes the forest of successor trees (a Prolog list). The example tree depicted opposite is therefore represented by the following Prolog term: 
+
+In Prolog we represent a multiway tree by a term t(X,F), where X denotes the root node and F denotes the forest of successor trees (a Prolog list). The example tree depicted opposite is therefore represented by the following Prolog term:
 T = t(a,[t(f,[t(g,[])]),t(c,[]),t(b,[t(d,[]),t(e,[])])])
 
 
 
 
-P70B (*) Check whether a given term represents a multiway tree 
+P70B (*) Check whether a given term represents a multiway tree
 Write a predicate istree/1 which succeeds if and only if its argument is a Prolog term representing a multiway tree.
 Example:
 * istree(t(a,[t(f,[t(g,[])]),t(c,[]),t(b,[t(d,[]),t(e,[])])])).
 Yes
 
 
-P70C (*) Count the nodes of a multiway tree 
+P70C (*) Count the nodes of a multiway tree
 Write a predicate nnodes/1 which counts the nodes of a given multiway tree.
 Example:
 * nnodes(t(a,[t(f,[])]),N).
@@ -1105,47 +1150,47 @@ N = 2
 Write another version of the predicate that allows for a flow pattern (o,i).
 
 
-P70 (**) Tree construction from a node string  
+P70 (**) Tree construction from a node string
 We suppose that the nodes of a multiway tree contain single characters. In the depth-first order sequence of its nodes, a special character ^ has been inserted whenever, during the tree traversal, the move is a backtrack to the previous level.
 
-By this rule, the tree in the figure opposite is represented as: afg^^c^bd^e^^^ 
+By this rule, the tree in the figure opposite is represented as: afg^^c^bd^e^^^
 
-Define the syntax of the string and write a predicate tree(String,Tree) to construct the Tree when the String is given. Work with atoms (instead of strings). Make your predicate work in both directions. 
+Define the syntax of the string and write a predicate tree(String,Tree) to construct the Tree when the String is given. Work with atoms (instead of strings). Make your predicate work in both directions.
 
 
-P71 (*) Determine the internal path length of a tree 
-We define the internal path length of a multiway tree as the total sum of the path lengths from the root to all nodes of the tree. By this definition, the tree in the figure of problem P70 has an internal path length of 9. Write a predicate ipl(Tree,IPL) for the flow pattern (+,-). 
+P71 (*) Determine the internal path length of a tree
+We define the internal path length of a multiway tree as the total sum of the path lengths from the root to all nodes of the tree. By this definition, the tree in the figure of problem P70 has an internal path length of 9. Write a predicate ipl(Tree,IPL) for the flow pattern (+,-).
 
-P72 (*) Construct the bottom-up order sequence of the tree nodes 
-Write a predicate bottom-up(Tree,Seq) which constructs the bottom-up sequence of the nodes of the multiway tree Tree. Seq should be a Prolog list. What happens if you run your predicate backwords? 
+P72 (*) Construct the bottom-up order sequence of the tree nodes
+Write a predicate bottom-up(Tree,Seq) which constructs the bottom-up sequence of the nodes of the multiway tree Tree. Seq should be a Prolog list. What happens if you run your predicate backwords?
 
-P73 (**) Lisp-like tree representation 
-There is a particular notation for multiway trees in Lisp. Lisp is a prominent functional programming language, which is used primarily for artificial intelligence problems. As such it is one of the main competitors of Prolog. In Lisp almost everything is a list, just as in Prolog everything is a term. 
+P73 (**) Lisp-like tree representation
+There is a particular notation for multiway trees in Lisp. Lisp is a prominent functional programming language, which is used primarily for artificial intelligence problems. As such it is one of the main competitors of Prolog. In Lisp almost everything is a list, just as in Prolog everything is a term.
 
-The following pictures show how multiway tree structures are represented in Lisp. 
- 
+The following pictures show how multiway tree structures are represented in Lisp.
+
 Note that in the "lispy" notation a node with successors (children) in the tree is always the first element in a list, followed by its children. The "lispy" representation of a multiway tree is a sequence of atoms and parentheses '(' and ')', which we shall collectively call "tokens". We can represent this sequence of tokens as a Prolog list; e.g. the lispy expression (a (b c)) could be represented as the Prolog list ['(', a, '(', b, c, ')', ')']. Write a predicate tree-ltl(T,LTL) which constructs the "lispy token list" LTL if the tree is given as term T in the usual Prolog notation.
 
 Example:
 * tree-ltl(t(a,[t(b,[]),t(c,[])]),LTL).
-LTL = ['(', a, '(', b, c, ')', ')'] 
-As a second, even more interesting exercise try to rewrite tree-ltl/2 in a way that the inverse conversion is also possible: Given the list LTL, construct the Prolog tree T. Use difference lists. 
+LTL = ['(', a, '(', b, c, ')', ')']
+As a second, even more interesting exercise try to rewrite tree-ltl/2 in a way that the inverse conversion is also possible: Given the list LTL, construct the Prolog tree T. Use difference lists.
 
 
 Graphs
-A graph is defined as a set of nodes and a set of edges, where each edge is a pair of nodes. 
-There are several ways to represent graphs in Prolog. One method is to represent each edge separately as one clause (fact). In this form, the graph depicted below is represented as the following predicate:  
+A graph is defined as a set of nodes and a set of edges, where each edge is a pair of nodes.
+There are several ways to represent graphs in Prolog. One method is to represent each edge separately as one clause (fact). In this form, the graph depicted below is represented as the following predicate:
 
 edge(h,g).
 edge(k,f).
 edge(f,b).
 ...
 
-We call this edge-clause form. Obviously, isolated nodes cannot be represented. Another method is to represent the whole graph as one data object. According to the definition of the graph as a pair of two sets (nodes and edges), we may use the following Prolog term to represent the example graph: 
+We call this edge-clause form. Obviously, isolated nodes cannot be represented. Another method is to represent the whole graph as one data object. According to the definition of the graph as a pair of two sets (nodes and edges), we may use the following Prolog term to represent the example graph:
 graph([b,c,d,f,g,h,k],[e(b,c),e(b,f),e(c,f),e(f,k),e(g,h)])
 
-We call this graph-term form. Note, that the lists are kept sorted, they are really sets, without duplicated elements. Each edge appears only once in the edge list; i.e. an edge from a node x to another node y is represented as e(x,y), the term e(y,x) is not present. The graph-term form is our default representation. In SWI-Prolog there are predefined predicates to work with sets. 
-A third representation method is to associate with each node the set of nodes that are adjacent to that node. We call this the adjacency-list form. In our example: 
+We call this graph-term form. Note, that the lists are kept sorted, they are really sets, without duplicated elements. Each edge appears only once in the edge list; i.e. an edge from a node x to another node y is represented as e(x,y), the term e(y,x) is not present. The graph-term form is our default representation. In SWI-Prolog there are predefined predicates to work with sets.
+A third representation method is to associate with each node the set of nodes that are adjacent to that node. We call this the adjacency-list form. In our example:
 
 [n(b,[c,f]), n(c,[b,f]), n(d,[]), n(f,[b,c,k]), ...]
 
@@ -1153,104 +1198,104 @@ The representations we introduced so far are Prolog terms and therefore well sui
 
 [b-c, f-c, g-h, d, f-b, k-f, h-g]
 
-We call this the human-friendly form. As the example shows, the list does not have to be sorted and may even contain the same edge multiple times. Notice the isolated node d. (Actually, isolated nodes do not even have to be atoms in the Prolog sense, they can be compound terms, as in d(3.75,blue) instead of d in the example). 
+We call this the human-friendly form. As the example shows, the list does not have to be sorted and may even contain the same edge multiple times. Notice the isolated node d. (Actually, isolated nodes do not even have to be atoms in the Prolog sense, they can be compound terms, as in d(3.75,blue) instead of d in the example).
 
- When the edges are directed we call them arcs. These are represented by ordered pairs. Such a graph is called directed graph. To represent a directed graph, the forms discussed above are slightly modified. The example graph opposite is represented as follows: 
+ When the edges are directed we call them arcs. These are represented by ordered pairs. Such a graph is called directed graph. To represent a directed graph, the forms discussed above are slightly modified. The example graph opposite is represented as follows:
 
 
-Arc-clause form 
+Arc-clause form
 arc(s,u).
 arc(u,r).
-... 
+...
 
-Graph-term form 
-digraph([r,s,t,u,v],[a(s,r),a(s,u),a(u,r),a(u,s),a(v,u)]) 
+Graph-term form
+digraph([r,s,t,u,v],[a(s,r),a(s,u),a(u,r),a(u,s),a(v,u)])
 
-Adjacency-list form 
+Adjacency-list form
 [n(r,[]),n(s,[r,u]),n(t,[]),n(u,[r]),n(v,[u])]
-Note that the adjacency-list does not have the information on whether it is a graph or a digraph. 
+Note that the adjacency-list does not have the information on whether it is a graph or a digraph.
 
-Human-friendly form 
-[s > r, t, u > r, s > u, u > s, v > u] 
+Human-friendly form
+[s > r, t, u > r, s > u, u > s, v > u]
 
 
 Finally, graphs and digraphs may have additional information attached to nodes and edges (arcs). For the nodes, this is no problem, as we can easily replace the single character identifiers with arbitrary compound terms, such as city('London',4711). On the other hand, for edges we have to extend our notation. Graphs with additional information attached to edges are called labelled graphs.
 
- 
 
-Arc-clause form 
+
+Arc-clause form
 arc(m,q,7).
 arc(p,q,9).
-arc(p,m,5). 
+arc(p,m,5).
 
-Graph-term form 
-digraph([k,m,p,q],[a(m,p,7),a(p,m,5),a(p,q,9)]) 
+Graph-term form
+digraph([k,m,p,q],[a(m,p,7),a(p,m,5),a(p,q,9)])
 
-Adjacency-list form 
+Adjacency-list form
 [n(k,[]),n(m,[q/7]),n(p,[m/5,q/9]),n(q,[])]
-Notice how the edge information has been packed into a term with functor '/' and arity 2, together with the corresponding node. 
+Notice how the edge information has been packed into a term with functor '/' and arity 2, together with the corresponding node.
 
-Human-friendly form 
-[p>q/9, m>q/7, k, p>m/5] 
+Human-friendly form
+[p>q/9, m>q/7, k, p>m/5]
 
 
-The notation for labelled graphs can also be used for so-called multi-graphs, where more than one edge (or arc) are allowed between two given nodes. 
+The notation for labelled graphs can also be used for so-called multi-graphs, where more than one edge (or arc) are allowed between two given nodes.
 
-P80 (***) Conversions 
-Write predicates to convert between the different graph representations. With these predicates, all representations are equivalent; i.e. for the following problems you can always pick freely the most convenient form. The reason this problem is rated (***) is not because it's particularly difficult, but because it's a lot of work to deal with all the special cases. 
+P80 (***) Conversions
+Write predicates to convert between the different graph representations. With these predicates, all representations are equivalent; i.e. for the following problems you can always pick freely the most convenient form. The reason this problem is rated (***) is not because it's particularly difficult, but because it's a lot of work to deal with all the special cases.
 
-P81 (**) Path from one node to another one 
-Write a predicate path(G,A,B,P) to find an acyclic path P from node A to node b in the graph G. The predicate should return all paths via backtracking. 
+P81 (**) Path from one node to another one
+Write a predicate path(G,A,B,P) to find an acyclic path P from node A to node b in the graph G. The predicate should return all paths via backtracking.
 
-P82 (*) Cycle from a given node 
-Write a predicate cycle(G,A,P) to find a closed path (cycle) P starting at a given node A in the graph G. The predicate should return all cycles via backtracking. 
+P82 (*) Cycle from a given node
+Write a predicate cycle(G,A,P) to find a closed path (cycle) P starting at a given node A in the graph G. The predicate should return all cycles via backtracking.
 
- 
-P83 (**) Construct all spanning trees 
-Write a predicate s-tree(Graph,Tree) to construct (by backtracking) all spanning trees of a given graph. With this predicate, find out how many spanning trees there are for the graph depicted to the left. The data of this example graph can be found in the file p83.dat. When you have a correct solution for the s-tree/2 predicate, use it to define two other useful predicates: is-tree(Graph) and is-connected(Graph). Both are five-minutes tasks! 
 
- 
-P84 (**) Construct the minimal spanning tree 
+P83 (**) Construct all spanning trees
+Write a predicate s-tree(Graph,Tree) to construct (by backtracking) all spanning trees of a given graph. With this predicate, find out how many spanning trees there are for the graph depicted to the left. The data of this example graph can be found in the file p83.dat. When you have a correct solution for the s-tree/2 predicate, use it to define two other useful predicates: is-tree(Graph) and is-connected(Graph). Both are five-minutes tasks!
+
+
+P84 (**) Construct the minimal spanning tree
 Write a predicate ms-tree(Graph,Tree,Sum) to construct the minimal spanning tree of a given labelled graph. Hint: Use the algorithm of Prim. A small modification of the solution of P83 does the trick. The data of the example graph to the right can be found in the file p84.dat.
 
 
 
-P85 (**) Graph isomorphism 
+P85 (**) Graph isomorphism
 Two graphs G1(N1,E1) and G2(N2,E2) are isomorphic if there is a bijection f: N1 -> N2 such that for any nodes X,Y of N1, X and Y are adjacent if and only if f(X) and f(Y) are adjacent.
-Write a predicate that determines whether two graphs are isomorphic. Hint: Use an open-ended list to represent the function f. 
+Write a predicate that determines whether two graphs are isomorphic. Hint: Use an open-ended list to represent the function f.
 
-P86 (**) Node degree and graph coloration 
+P86 (**) Node degree and graph coloration
 a) Write a predicate degree(Graph,Node,Deg) that determines the degree of a given node.
 b) Write a predicate that generates a list of all nodes of a graph sorted according to decreasing degree.
 
-c) Use Welch-Powell's algorithm to paint the nodes of a graph in such a way that adjacent nodes have different colors. 
+c) Use Welch-Powell's algorithm to paint the nodes of a graph in such a way that adjacent nodes have different colors.
 
 
-P87 (**) Depth-first order graph traversal (alternative solution) 
-Write a predicate that generates a depth-first order graph traversal sequence. The starting point should be specified, and the output should be a list of nodes that are reachable from this starting point (in depth-first order). 
+P87 (**) Depth-first order graph traversal (alternative solution)
+Write a predicate that generates a depth-first order graph traversal sequence. The starting point should be specified, and the output should be a list of nodes that are reachable from this starting point (in depth-first order).
 
-P88 (**) Connected components (alternative solution) 
-Write a predicate that splits a graph into its connected components. 
+P88 (**) Connected components (alternative solution)
+Write a predicate that splits a graph into its connected components.
 
-P89 (**) Bipartite graphs 
-Write a predicate that finds out whether a given graph is bipartite. 
+P89 (**) Bipartite graphs
+Write a predicate that finds out whether a given graph is bipartite.
 
 
 
 Miscellaneous Problems
-P90 (**) Eight queens problem 
+P90 (**) Eight queens problem
 This is a classical problem in computer science. The objective is to place eight queens on a chessboard so that no two queens are attacking each other; i.e., no two queens are in the same row, the same column, or on the same diagonal.
 
 Hint: Represent the positions of the queens as a list of numbers 1..N. Example: [4,2,7,3,6,8,5,1] means that the queen in the first column is in row 4, the queen in the second column is in row 2, etc. Use the generate-and-test paradigm.
 
-P91 (**) Knight's tour 
+P91 (**) Knight's tour
 Another famous problem is this one: How can a knight jump on an NxN chessboard in such a way that it visits every square exactly once?
 
-Hints: Represent the squares by pairs of their coordinates of the form X/Y, where both X and Y are integers between 1 and N. (Note that '/' is just a convenient functor, not division!) Define the relation jump(N,X/Y,U/V) to express the fact that a knight can jump from X/Y to U/V on a NxN chessboard. And finally, represent the solution of our problem as a list of N*N knight positions (the knight's tour). 
+Hints: Represent the squares by pairs of their coordinates of the form X/Y, where both X and Y are integers between 1 and N. (Note that '/' is just a convenient functor, not division!) Define the relation jump(N,X/Y,U/V) to express the fact that a knight can jump from X/Y to U/V on a NxN chessboard. And finally, represent the solution of our problem as a list of N*N knight positions (the knight's tour).
 
-P92 (***) Von Koch's conjecture 
+P92 (***) Von Koch's conjecture
 Several years ago I met a mathematician who was intrigued by a problem for which he didn't know a solution. His name was Von Koch, and I don't know whether the problem has been solved since.
-  
+
 
 Anyway the puzzle goes like this: Given a tree with N nodes (and hence N-1 edges). Find a way to enumerate the nodes from 1 to N and, accordingly, the edges from 1 to N-1 in such a way, that for each edge K the difference of its node numbers equals to K. The conjecture is that this is always possible.
 
@@ -1259,17 +1304,17 @@ For small trees the problem is easy to solve by hand. However, for larger trees,
 Write a predicate that calculates a numbering scheme for a given tree. What is the solution for the larger tree pictured above?
 
 
-P93 (***) An arithmetic puzzle 
+P93 (***) An arithmetic puzzle
 Given a list of integer numbers, find a correct way of inserting arithmetic signs (operators) such that the result is a correct equation. Example: With the list of numbers [2,3,5,7,11] we can form the equations 2-3+5+7 = 11 or 2 = (3*5+7)/11 (and ten others!).
 
-P94 (***) Generate K-regular simple graphs with N nodes 
-In a K-regular graph all nodes have a degree of K; i.e. the number of edges incident in each node is K. How many (non-isomorphic!) 3-regular graphs with 6 nodes are there? See also a table of results and a Java applet that can represent graphs geometrically. 
+P94 (***) Generate K-regular simple graphs with N nodes
+In a K-regular graph all nodes have a degree of K; i.e. the number of edges incident in each node is K. How many (non-isomorphic!) 3-regular graphs with 6 nodes are there? See also a table of results and a Java applet that can represent graphs geometrically.
 
-;; P95 (**) English number words 
+;; P95 (**) English number words
 ;; On financial documents, like cheques, numbers must sometimes be
 ;; written in full words. Example: 175 must be written as
 ;; one-seven-five. Write a predicate full-words/1 to print
-;; (non-negative) integer numbers in full words. 
+;; (non-negative) integer numbers in full words.
 (defun my-english-number-words (n)
   "This function only works for integers that elisp supports, i.e.,
 smaller than `most-positive-fixnum'."
@@ -1311,16 +1356,16 @@ smaller than `most-positive-fixnum'."
 ;; (my-english-number-words-string-version "891A-87")
 ;; => "eight-nine-one-UNKNOWN NUMBER:A-UNKNOWN NUMBER:--eight-seven"
 
-P96 (**) Syntax checker (alternative solution with difference lists) 
+P96 (**) Syntax checker (alternative solution with difference lists)
  In a certain programming language (Ada) identifiers are defined by the syntax diagram (railroad chart) opposite. Transform the syntax diagram into a system of syntax diagrams which do not contain loops; i.e. which are purely recursive. Using these modified diagrams, write a predicate identifier/1 that can check whether or not a given string is a legal identifier.
 
-% identifier(Str) :- Str is a legal identifier 
+% identifier(Str) :- Str is a legal identifier
 
-P97 (**) Sudoku 
-Sudoku puzzles go like this: 
+P97 (**) Sudoku
+Sudoku puzzles go like this:
    Problem statement                 Solution
 
-    .  .  4 | 8  .  . | .  1  7      9  3  4 | 8  2  5 | 6  1  7             
+    .  .  4 | 8  .  . | .  1  7      9  3  4 | 8  2  5 | 6  1  7
             |         |                      |         |
     6  7  . | 9  .  . | .  .  .      6  7  2 | 9  1  4 | 8  5  3
             |         |                      |         |
@@ -1337,34 +1382,34 @@ Sudoku puzzles go like this:
     .  .  . | .  .  6 | .  9  1      8  5  3 | 4  7  6 | 2  9  1
             |         |                      |         |
     2  4  . | .  .  1 | 5  .  .      2  4  6 | 3  9  1 | 5  7  8
-   
-Every spot in the puzzle belongs to a (horizontal) row and a (vertical) column, as well as to one single 3x3 square (which we call "square" for short). At the beginning, some of the spots carry a single-digit number between 1 and 9. The problem is to fill the missing spots with digits in such a way that every number between 1 and 9 appears exactly once in each row, in each column, and in each square. 
 
-P98 (***) Nonograms 
+Every spot in the puzzle belongs to a (horizontal) row and a (vertical) column, as well as to one single 3x3 square (which we call "square" for short). At the beginning, some of the spots carry a single-digit number between 1 and 9. The problem is to fill the missing spots with digits in such a way that every number between 1 and 9 appears exactly once in each row, in each column, and in each square.
+
+P98 (***) Nonograms
 Around 1994, a certain kind of puzzles was very popular in England. The "Sunday Telegraph" newspaper wrote: "Nonograms are puzzles from Japan and are currently published each week only in The Sunday Telegraph. Simply use your logic and skill to complete the grid and reveal a picture or diagram." As a Prolog programmer, you are in a better situation: you can have your computer do the work! Just write a little program ;-).
-The puzzle goes like this: Essentially, each row and column of a rectangular bitmap is annotated with the respective lengths of its distinct strings of occupied cells. The person who solves the puzzle must complete the bitmap given only these lengths. 
+The puzzle goes like this: Essentially, each row and column of a rectangular bitmap is annotated with the respective lengths of its distinct strings of occupied cells. The person who solves the puzzle must complete the bitmap given only these lengths.
 
           Problem statement:          Solution:
 
-          |_|_|_|_|_|_|_|_| 3         |_|X|X|X|_|_|_|_| 3           
-          |_|_|_|_|_|_|_|_| 2 1       |X|X|_|X|_|_|_|_| 2 1         
-          |_|_|_|_|_|_|_|_| 3 2       |_|X|X|X|_|_|X|X| 3 2         
-          |_|_|_|_|_|_|_|_| 2 2       |_|_|X|X|_|_|X|X| 2 2         
-          |_|_|_|_|_|_|_|_| 6         |_|_|X|X|X|X|X|X| 6           
-          |_|_|_|_|_|_|_|_| 1 5       |X|_|X|X|X|X|X|_| 1 5         
-          |_|_|_|_|_|_|_|_| 6         |X|X|X|X|X|X|_|_| 6           
-          |_|_|_|_|_|_|_|_| 1         |_|_|_|_|X|_|_|_| 1           
-          |_|_|_|_|_|_|_|_| 2         |_|_|_|X|X|_|_|_| 2           
-           1 3 1 7 5 3 4 3             1 3 1 7 5 3 4 3              
-           2 1 5 1                     2 1 5 1                      
-   
-For the example above, the problem can be stated as the two lists [[3],[2,1],[3,2],[2,2],[6],[1,5],[6],[1],[2]] and [[1,2],[3,1],[1,5],[7,1],[5],[3],[4],[3]] which give the "solid" lengths of the rows and columns, top-to-bottom and left-to-right, respectively. Published puzzles are larger than this example, e.g. 25 x 20, and apparently always have unique solutions. 
+          |_|_|_|_|_|_|_|_| 3         |_|X|X|X|_|_|_|_| 3
+          |_|_|_|_|_|_|_|_| 2 1       |X|X|_|X|_|_|_|_| 2 1
+          |_|_|_|_|_|_|_|_| 3 2       |_|X|X|X|_|_|X|X| 3 2
+          |_|_|_|_|_|_|_|_| 2 2       |_|_|X|X|_|_|X|X| 2 2
+          |_|_|_|_|_|_|_|_| 6         |_|_|X|X|X|X|X|X| 6
+          |_|_|_|_|_|_|_|_| 1 5       |X|_|X|X|X|X|X|_| 1 5
+          |_|_|_|_|_|_|_|_| 6         |X|X|X|X|X|X|_|_| 6
+          |_|_|_|_|_|_|_|_| 1         |_|_|_|_|X|_|_|_| 1
+          |_|_|_|_|_|_|_|_| 2         |_|_|_|X|X|_|_|_| 2
+           1 3 1 7 5 3 4 3             1 3 1 7 5 3 4 3
+           2 1 5 1                     2 1 5 1
 
-P99 (***) Crossword puzzle 
+For the example above, the problem can be stated as the two lists [[3],[2,1],[3,2],[2,2],[6],[1,5],[6],[1],[2]] and [[1,2],[3,1],[1,5],[7,1],[5],[3],[4],[3]] which give the "solid" lengths of the rows and columns, top-to-bottom and left-to-right, respectively. Published puzzles are larger than this example, e.g. 25 x 20, and apparently always have unique solutions.
+
+P99 (***) Crossword puzzle
 Given an empty (or almost empty) framework of a crossword puzzle and a set of words. The problem is to place the words into the framework.
- The particular crossword puzzle is specified in a text file which first lists the words (one word per line) in an arbitrary order. Then, after an empty line, the crossword framework is defined. In this framework specification, an empty character location is represented by a dot (.). In order to make the solution easier, character locations can also contain predefined character values. The puzzle opposite is defined in the file p99a.dat, other examples are p99b.dat and p99d.dat. There is also an example of a puzzle (p99c.dat) which does not have a solution. 
+ The particular crossword puzzle is specified in a text file which first lists the words (one word per line) in an arbitrary order. Then, after an empty line, the crossword framework is defined. In this framework specification, an empty character location is represented by a dot (.). In order to make the solution easier, character locations can also contain predefined character values. The puzzle opposite is defined in the file p99a.dat, other examples are p99b.dat and p99d.dat. There is also an example of a puzzle (p99c.dat) which does not have a solution.
 
-Words are strings (character lists) of at least two characters. A horizontal or vertical sequence of character places in the crossword puzzle framework is called a site. Our problem is to find a compatible way of placing words onto sites. 
+Words are strings (character lists) of at least two characters. A horizontal or vertical sequence of character places in the crossword puzzle framework is called a site. Our problem is to find a compatible way of placing words onto sites.
 
 
 Hints: (1) The problem is not easy. You will need some time to thoroughly understand it. So, don't give up too early! And remember that the objective is a clean solution, not just a quick-and-dirty hack!
