@@ -62,7 +62,7 @@
 ;; solution by loop
 (defun my-reverse (list)
   (let ((rest list)
-	reverse)
+        reverse)
     (while rest
       (push (car rest) reverse)
       (setq rest (cdr rest)))
@@ -270,6 +270,15 @@
       (setq duplist (append duplist (list elem elem))))
     duplist))
 
+;; with recursion
+(defun my-duplicate (list)
+  (if list
+      (append (cons (car list) nil)
+              (cons (car list) nil)
+              (my-duplicate (cdr list)))
+    nil))
+;; (my-duplicate '(1 2 3)) => (1 1 2 2 3 3)
+
 
 ;; P15 (**) Replicate the elements of a list a given number of times.
 ;; Example:
@@ -280,6 +289,14 @@
     (dolist (elem list)
       (setq replist (append replist (make-list repeat elem))))
     replist))
+
+;; with recursion
+(defun my-replicate (list repeat)
+  (if list
+      (append (make-list repeat (car list))
+              (my-replicate (cdr list) repeat))
+    nil))
+;; (my-replicate '(a b c) 3) => (a a a b b b c c c)
 
 
 ;; P16 (**) Drop every N'th element from a list.
@@ -294,6 +311,24 @@
         (setq i (1+ i))
         (setq droplist (append droplist (cons elem nil)))))
     droplist))
+
+;; with recursion
+(defun my-drop (list n)
+  (if list
+      (append (subseq list 0 (1- n))
+              (my-drop (nthcdr n list) n))
+    nil))
+;; or just define the heading `subseq' as
+;; (defun my-head (list n)
+;;   (reverse (nthcdr (- (length list) n) (reverse list))))
+;; which do NOT check inputs.
+(defun my-drop (list n)
+  (if list
+      (append (reverse (nthcdr (- (length list) (1- n)) (reverse list)))
+              (my-drop (nthcdr n list) n))
+    nil))
+;; (my-drop '(1 2 3 4 5 6) 3)       ;; => (1 2 4 5)
+;; (my-drop '(1 2 3 4 5 6 7 8 9) 4) ;; => (1 2 3 5 6 7 9)
 
 
 ;; P17 (*) Split a list into two parts; the length of the first part
@@ -316,6 +351,12 @@ implemented just by `cdr'."
 (defun my-split (list n)
   (cons (my-split-head list n) (cons (my-split-tail list n) nil)))
 
+;; with `reverse' and `nthcdr'
+(defun my-split (list n)
+  (cons (reverse (nthcdr (- (length list) n) (reverse list)))
+        (cons (nthcdr n list) nil)))
+;; (my-split '(1 2 3 4 5 6 7 8) 3)      ;; ((1 2 3) (4 5 6 7 8))
+
 
 ;; P18 (**) Extract a slice from a list.
 ;; Given two indices, I and K, the slice is the list containing the
@@ -335,6 +376,12 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; The non-destructive version goes here.
 (defun my-slice (list begin end)
   (nthcdr (1- begin) (butlast list (- (length list) end))))
+
+;; with `reverse' and `nthcdr', zero based, both BEGIN and END are
+;; inclusive. drop the tail, then drop the head.
+(defun my-slice (list begin end)
+  (nthcdr begin (reverse (nthcdr (- (length list) end) (reverse list)))))
+;; (my-slice '(1 2 3 4 5 6 7) 2 5)              ; (3 4 5)
 
 
 ;; P19 (**) Rotate a list N places to the left.
@@ -388,6 +435,30 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; (range 4 9) => (4 5 6 7 8 9)
 
 ;; Please refer to `number-sequence' at subr.el.
+
+;; with loop
+(defun my-number-sequence (begin end)
+  (let ((inc (if (<= begin end)
+                 1
+               -1))
+        (n begin)
+        seq)
+    (while (<= (* inc n) (* inc end))
+      (push n seq)
+      (setq n (+ n inc)))
+    (reverse seq)))
+;; (my-number-sequence 4 -3.5)          ; (4 3 2 1 0 -1 -2 -3)
+
+;; with recursion
+(defun my-number-sequence (begin end inc)
+  (if (or (and (> inc 0) (> begin end))
+          (and (< inc 0) (< begin end))
+          (zerop inc))
+      nil
+    (append (cons begin nil) (my-number-sequence (+ begin inc) end inc))))
+;; (my-number-sequence 2 -7 -2)         ; (2 0 -2 -4 -6)
+;; (my-number-sequence 3 11 3)          ; (3 6 9)
+;; (my-number-sequence 3 8 0)           ; nil
 
 
 ;; P23 (**) Extract a given number of randomly selected elements from a list.
@@ -460,38 +531,38 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;;;; TODO TODO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my-comb-first (n)
   (let ((i n)
-	first)
+        first)
     (while (> i 0)
       (push i first)
       (setq i (1- i)))
     first))
 (defun my-comb-next (comb max)
   (let ((pos (1- (length comb)))
-	(available-max max)
-	(next nil)
-	value)
+        (available-max max)
+        (next nil)
+        value)
     ;; get position that can +1
     (while (= available-max (nth pos comb))
       (setq available-max (1- available-max)
-	    pos (1- pos)))
+            pos (1- pos)))
     (if (< pos 0)
-	(setq next nil)
+        (setq next nil)
       (setq value (1+ (car (nthcdr pos comb))))
       (setq next (copy-sequence comb))
       (while (< pos (length comb))
-	(setcar (nthcdr pos next) value)
-	(setq pos (1+ pos) value (1+ value))))
+        (setcar (nthcdr pos next) value)
+        (setq pos (1+ pos) value (1+ value))))
     next))
 (defun my-comb-list (n list)
   (let ((comb-index (my-comb-first n))
-	(max (length list))
-	comb
-	comb-all)
+        (max (length list))
+        comb
+        comb-all)
     (while comb-index
       ;(print comb-index)
       (setq comb nil)
       (dolist (i comb-index)
-	(setq comb (append comb (cons (nth (1- i) list) nil))))
+        (setq comb (append comb (cons (nth (1- i) list) nil))))
       (message "%s" comb)
       ;; reverse order
       ;; (push comb comb-all)
@@ -511,8 +582,8 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; ( ( (ALDO BEAT) (CARLA DAVID EVI) (FLIP GARY HUGO IDA) )
 ;; ... )
 
-;; b) Generalize the above predicate in a way that we can specify a list of group sizes and the predicate will return a list of groups.
-
+;; b) Generalize the above predicate in a way that we can specify a
+;; list of group sizes and the predicate will return a list of groups.
 ;; Example:
 ;; * (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))
 ;; ( ( (ALDO BEAT) (CARLA DAVID) (EVI FLIP GARY HUGO IDA) )
@@ -528,21 +599,21 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 (defun my-group (list group &optional head)
   "HEAD: groups(inside one combination) colleted so far."
   (cond ((or (null list) (null group)) nil)
-	((= (length list) (car group))
-	 ;; one of the combinations
-	 (message "%s" (append head (cons list nil))))
-	(t
-	 (let ((comb (my-comb-first (car group)))
-	       (listcopy (copy-sequence list))
-	       (max (length list))
-	       values)
-	   (while comb
-	     (setq values (my-index-to-value list comb))
-	     (dolist (elem values)
-	       (setq listcopy (delete elem listcopy)))
-	     (my-group listcopy (cdr group) (append head (cons values nil)))
-	     (setq comb (my-comb-next comb max))
-	     (setq listcopy (copy-sequence list)))))))
+        ((= (length list) (car group))
+         ;; one of the combinations
+         (message "%s" (append head (cons list nil))))
+        (t
+         (let ((comb (my-comb-first (car group)))
+               (listcopy (copy-sequence list))
+               (max (length list))
+               values)
+           (while comb
+             (setq values (my-index-to-value list comb))
+             (dolist (elem values)
+               (setq listcopy (delete elem listcopy)))
+             (my-group listcopy (cdr group) (append head (cons values nil)))
+             (setq comb (my-comb-next comb max))
+             (setq listcopy (copy-sequence list)))))))
 ;; (my-group '(a b c d) '(2 2)) =>
 ;; the output (not the return value) is:
 ;; ((a b) (c d))
@@ -561,20 +632,60 @@ non-destructive version is `butlast' which uses `copy-sequence'."
 ;; on discrete mathematics under the term "multinomial coefficients".
 
 
-P28 (**) Sorting a list of lists according to length of sublists
-a) We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
+;; P28 (**) Sorting a list of lists according to length of sublists
+;; a) We suppose that a list contains elements that are lists
+;; themselves. The objective is to sort the elements of this list
+;; according to their length. E.g. short lists first, longer lists
+;; later, or vice versa.
+;; Example:
+;; * (lsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
+;; ((O) (D E) (D E) (M N) (A B C) (F G H) (I J K L))
+;; Requirement: `sort'
+(defun my-length-sort (list)
+  (sort list '(lambda (a b)
+                (if (<= (length a) (length b)) t nil))))
+;; (my-length-sort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
+;; => ((o) (m n) (d e) (d e) (f g h) (a b c) (i j k l))
 
-Example:
-* (lsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
-((O) (D E) (D E) (M N) (A B C) (F G H) (I J K L))
+;; b) Again, we suppose that a list contains elements that are lists
+;; themselves. But this time the objective is to sort the elements of
+;; this list according to their length frequency; i.e., in the
+;; default, where sorting is done ascendingly, lists with rare lengths
+;; are placed first, others with a more frequent length come later.
+;; Example:
+;; * (lfsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
+;; ((i j k l) (o) (a b c) (f g h) (d e) (d e) (m n))
 
-b) Again, we suppose that a list contains elements that are lists themselves. But this time the objective is to sort the elements of this list according to their length frequency; i.e., in the default, where sorting is done ascendingly, lists with rare lengths are placed first, others with a more frequent length come later.
+;; Note that in the above example, the first two lists in the result
+;; have length 4 and 1, both lengths appear just once. The third and
+;; forth list have length 3 which appears twice (there are two list of
+;; this length). And finally, the last three lists have length 2. This
+;; is the most frequent length.
 
-Example:
-* (lfsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
-((i j k l) (o) (a b c) (f g h) (d e) (d e) (m n))
+;; steps:
+;; 1. sort it by length
+;; 2. pack it by length
+;; 3. sort it by length
+;; 4. flatten
+(defun my-length-frequency-sort (list)
+  ;; 1. sort it by length
+  (setq list (sort list '(lambda (a b) (if (<= (length a) (length b)) t nil))))
+  ;; 2. pack it, Ref. P09
+  (let (groups)
+    (loop for el in list
+          for first-group = (when (= (length el) (length (caar groups))) (pop groups))
+          do (push (cons el first-group) groups))
+    (setq list (reverse groups)))
+  ;; 3. sort it by length
+  (setq list (sort list '(lambda (a b) (if (<= (length a) (length b)) t nil))))
+  ;; 4. flatten
+  (let (flat)
+    (dolist (el list)
+      (setq flat (append flat el)))
+    (setq list flat)))
+;; (my-length-frequency-sort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
+;; => ((i j k l) (o) (a b c) (f g h) (d e) (d e) (m n))
 
-Note that in the above example, the first two lists in the result have length 4 and 1, both lengths appear just once. The third and forth list have length 3 which appears twice (there are two list of this length). And finally, the last three lists have length 2. This is the most frequent length.
 
 ;; Arithmetic
 ;; P31 (**) Determine whether a given integer number is prime.
@@ -606,6 +717,18 @@ Note that in the above example, the first two lists in the result have length 4 
       (setq m n))
     n))
 
+;; with recursion
+;; make sure
+(defun my-gcd (a b)
+  (let ((r (% a b)))
+    (if (zerop r)
+        b
+      (my-gcd b r))))
+;; (my-gcd  8 12)                          ; 4
+;; (my-gcd 24 18)                          ; 6
+;; (my-gcd 25 16)                          ; 1
+
+
 ;; P33 (*) Determine whether two positive integer numbers are coprime.
 ;; Two numbers are coprime if their greatest common divisor equals 1.
 ;; Example:
@@ -615,6 +738,7 @@ Note that in the above example, the first two lists in the result have length 4 
   (if (= 1 (my-gcd a b))
       t
     nil))
+
 
 ;; P34 (**) Calculate Euler's totient function phi(m).
 ;; Euler's so-called totient function phi(m) is defined as the number
@@ -630,6 +754,7 @@ Note that in the above example, the first two lists in the result have length 4 
       (if (= 1 (my-gcd i n)) (setq phi (1+ phi)))
       (setq i (1+ i)))
     phi))
+
 
 ;; Find out what the value of phi(m) is if m is a prime
 ;; number. Euler's totient function plays an important role in one of
@@ -713,6 +838,27 @@ Note that in the above example, the first two lists in the result have length 4 
           (setq pfactors (append pfactors (cons (list p m) nil))))
     pfactors))
 
+;; usual way, try each 2,3,4,5,6....
+(defun my-prime-factors (n &optional i)
+  (or i (setq i 2))
+  (cond ((<= n 1) (cons n nil))
+        ((= n i) (cons n nil))
+        ((zerop (% n i))
+         (append (cons i nil) (my-prime-factors (/ n i) i)))
+        (t
+         (my-prime-factors n (1+ i)))))
+;; (my-prime-factors 11)                   ;(11)
+;; (my-prime-factors 12)                   ;(2 2 3)
+;; (my-prime-factors 13)                   ;(13)
+;; (my-prime-factors 14)                   ;(2 7)
+;; (my-prime-factors 100)                  ;(2 2 5 5)
+;; (my-prime-factors 8710)                 ;(2 5 13 67)
+;; (my-prime-factors 17)                   ;(17)
+;; but my error with large numbers with large prime factors
+;; too many level of recursion
+;; better to do it with loop
+
+
 
 ;; P36 (**) Determine the prime factors of a given positive integer (2).
 ;; Construct a list containing the prime factors and their multiplicity.
@@ -735,9 +881,7 @@ Note that in the above example, the first two lists in the result have length 4 
 ;; Note that a ** b stands for the b'th power of a.
 (defun my-power (x n)
   "Return X^N, where N should be a natural number."
-  (if (zerop n)
-      1
-    (* x (my-power x (1- n)))))
+  (if (zerop n) 1 (* x (my-power x (1- n)))))
 (defun my-phi-improved (pmlist)
   (let ((phi 0))
     (dolist (pm pmlist)
@@ -746,8 +890,11 @@ Note that in the above example, the first two lists in the result have length 4 
 ;; (my-phi-improved '((2 3) (3 2) (5 1))) => 22
 
 
-P38 (*) Compare the two methods of calculating Euler's totient function.
-Use the solutions of problems P34 and P37 to compare the algorithms. Take the number of logical inferences as a measure for efficiency. Try to calculate phi(10090) as an example.
+;; P38 (*) Compare the two methods of calculating Euler's totient function.
+;; Use the solutions of problems P34 and P37 to compare the
+;; algorithms. Take the number of logical inferences as a measure for
+;; efficiency. Try to calculate phi(10090) as an example.
+
 
 
 ;; P39 (*) A list of prime numbers.
